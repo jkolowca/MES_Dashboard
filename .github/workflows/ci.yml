@@ -22,6 +22,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Generate environment.ts
+      run: |
+        mkdir -p src/environments
+        echo "export const environment = { production: true, primeuiLicense: 'MOCK_CI_KEY' };" > src/environments/environment.ts
+        echo "export const environment = { production: false, primeuiLicense: 'MOCK_CI_KEY' };" > src/environments/environment.development.ts
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
