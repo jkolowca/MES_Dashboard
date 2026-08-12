@@ -1,0 +1,15 @@
+:host {
+  display: block;
+}
+
+.p-avatar {
+  flex-shrink: 0;
+}
+
+:host-context(.p-sidebar[data-collapsible=icon]) .p-sidebar-menu-button:has(.p-avatar) {
+  justify-content: center;
+
+  .p-avatar+* {
+    display: none;
+  }
+}

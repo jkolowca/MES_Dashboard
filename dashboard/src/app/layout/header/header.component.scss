@@ -1,0 +1,35 @@
+/* Header styles */
+:host {
+  display: block;
+
+  header {
+    display: flex;
+    flex-flow: row;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .left,
+    .right {
+      display: flex;
+      flex-flow: row;
+      gap: var(--p-gap-2);
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 0 0.5rem;
+    }
+
+    .logo {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .timestamp {
+      font-size: .9rem;
+    }
+  }
+}

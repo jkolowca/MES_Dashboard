@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  height: 100%;
+
+  .not-found-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+
+    .error-code {
+      font-size: 5rem;
+      @media (min-width: 768px) {
+        font-size: 8rem;
+      }
+      font-weight: 700;
+      color: var(--p-primary-500);
+      margin-bottom: 1rem;
+      margin-top: 0;
+    }
+
+    .error-title {
+      font-size: 1.5rem;
+      @media (min-width: 768px) {
+        font-size: 2rem;
+      }
+      font-weight: 600;
+      color: var(--p-text-color);
+      margin-bottom: 1rem;
+      margin-top: 0;
+    }
+
+    .error-description {
+      color: var(--p-surface-500);
+      margin-bottom: 2rem;
+      max-width: 400px;
+      line-height: 1.5;
+
+      :host-context(.app-dark) & {
+        color: var(--p-surface-400);
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+@let isMobile=uiStateService.isMobile();
+@if(isMobile) {
+<p-sidebar-backdrop />
+}
+<p-sidebar variant="sidebar" [overlay]="uiStateService.isMobile()" [collapsible]="'icon'" id="main-menu" [open]="false">
+  <p-sidebar-spacer />
+  <p-sidebar-aside>
+    <p-sidebar-panel>
+      <p-sidebar-header>
+        <p-sidebar-menu>
+          <p-sidebar-menu-item>
+            <button pSidebarMenuButton pSidebarTrigger target="main-menu" aria-label="Toggle menu" i18n-aria-label>
+              <svg pIcon="bars"></svg>
+            </button>
+          </p-sidebar-menu-item>
+        </p-sidebar-menu>
+      </p-sidebar-header>
+      <p-sidebar-content>
+        <p-sidebar-group>
+          <p-sidebar-group-label>
+            <span>Navigation</span>
+          </p-sidebar-group-label>
+          <p-sidebar-group-content>
+            <p-sidebar-menu>
+              @for (item of navigationService.menuItems(); track item.route) {
+              <p-sidebar-menu-item>
+                <a pSidebarMenuButton [routerLink]="item.route" routerLinkActive="p-sidebar-menu-item-active">
+                  <svg [pIcon]="item.icon"></svg>
+                  <span>{{ item.label }}</span>
+                </a>
+              </p-sidebar-menu-item>
+              }
+            </p-sidebar-menu>
+          </p-sidebar-group-content>
+        </p-sidebar-group>
+      </p-sidebar-content>
+      <p-sidebar-footer>
+        <app-user-profile-widget />
+      </p-sidebar-footer>
+    </p-sidebar-panel>
+  </p-sidebar-aside>
+</p-sidebar>

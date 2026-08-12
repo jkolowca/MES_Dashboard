@@ -1,0 +1,20 @@
+<p-sidebar-menu>
+  <p-sidebar-menu-item>
+    <button pSidebarMenuButton (click)="uiStateService.toggleTheme()">
+      <svg [pIcon]="uiStateService.isDarkMode() ? 'sun' : 'moon'"></svg>
+      <span>{{ uiStateService.isDarkMode() ? 'Light' : 'Dark' }}</span>
+    </button>
+  </p-sidebar-menu-item>
+  <p-sidebar-menu-item>
+    <button pSidebarMenuButton (click)="switchLanguage()">
+      <svg pIcon="globe"></svg>
+      <span>{{ isPolish() ? 'EN' : 'PL' }}</span>
+    </button>
+  </p-sidebar-menu-item>
+  <p-sidebar-menu-item>
+    <button pSidebarMenuButton>
+      <p-avatar [label]="userService.currentUser().name.charAt(0)" shape="circle"></p-avatar>
+      <span>{{ userService.currentUser().name }}</span>
+    </button>
+  </p-sidebar-menu-item>
+</p-sidebar-menu>

@@ -1,0 +1,13 @@
+/* Layout styles */
+:host {
+  display: block;
+}
+
+.p-sidebar-main {
+  padding: 0.5rem;
+  gap: 1rem;
+
+  main {
+    flex-grow: 1;
+  }
+}
