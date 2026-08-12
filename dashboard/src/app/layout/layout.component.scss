@@ -3,9 +3,16 @@
   display: block;
 }
 
+.p-sidebar-layout {
+  height: 100dvh;
+  min-height: fit-content;
+}
+
 .p-sidebar-main {
   padding: 0.5rem;
   gap: 1rem;
+  max-height: 100dvh;
+  overflow-y: auto;
 
   main {
     flex-grow: 1;
