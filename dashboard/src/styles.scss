@@ -1,1 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --p-typography-font-family: 'IBM Plex Sans', sans-serif !important;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: var(--p-typography-font-family);
+  background-color: var(--p-surface-50);
+  color: var(--p-text-color);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+}
+
+.font-mono {
+  font-family: var(--font-mono) !important;
+}
+
+/* Ensure PrimeNG icons are loaded properly */
+@import 'primeicons/primeicons.css';
