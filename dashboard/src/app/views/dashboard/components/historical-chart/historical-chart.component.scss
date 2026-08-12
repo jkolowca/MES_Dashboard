@@ -17,6 +17,9 @@
 .chart-wrapper {
   position: relative;
   display: block;
+  width: 100%;
+  aspect-ratio: 2.5;
+  min-height: 380px;
 }
 
 .loading-overlay {
@@ -72,6 +75,11 @@
 }
 
 @media (max-width: 768px) {
+  .chart-wrapper {
+    aspect-ratio: 1.2;
+    min-height: 280px;
+  }
+
   .chart-header {
     flex-direction: column;
     align-items: stretch;
