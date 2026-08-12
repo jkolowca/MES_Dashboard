@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" target-language="pl" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="6570363013146073520" datatype="html">
+        <source>Dashboard</source>
+        <target>Kokpit</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="5778514899777017666" datatype="html">
+        <source>Sensors</source>
+        <target>Czujniki</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7861389751355579174" datatype="html">
+        <source>Analytics</source>
+        <target>Analityka</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3465942650835858981" datatype="html">
+        <source>Maintenance</source>
+        <target>Utrzymanie ruchu</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2527485330251612044" datatype="html">
+        <source> App version: <x id="INTERPOLATION" equiv-text="{{ version }}"/> </source>
+        <target> Wersja aplikacji: <x id="INTERPOLATION" equiv-text="{{ version }}"/> </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/layout/footer/footer.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3075199488885025410" datatype="html">
+        <source>A-MES</source>
+        <target>A-MES</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/layout/header/header.component.html</context>
+          <context context-type="linenumber">4,5</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="3647616048271413511" datatype="html">
+        <source>Toggle menu</source>
+        <target>Przełącz menu</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/layout/sidebar/sidebar.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6578397717654172779" datatype="html">
+        <source>Page Not Found</source>
+        <target>Nie znaleziono strony</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/views/not-found/not-found.component.html</context>
+          <context context-type="linenumber">3,4</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="6132725696287873914" datatype="html">
+        <source> The page you are looking for doesn&apos;t exist or has been moved. </source>
+        <target> Strona, której szukasz, nie istnieje lub została przeniesiona. </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/views/not-found/not-found.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="81929436613898336" datatype="html">
+        <source>Back to Dashboard</source>
+        <target>Wróć do Kokpitu</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/views/not-found/not-found.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
