@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, linkedSignal } from '@angular/core';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
 import { getChartDatasetOptions, getChartOptions, TIME_SPAN_OPTIONS } from './historical-chart.config';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -25,7 +25,7 @@ export class HistoricalChartComponent {
     const meta = this.measurementService.metadata.value();
     if (!meta) return [];
     return Object.entries(meta).map(([key, value]) => ({
-      label: translateMetadataKey(value.chartI18nKey),
+      label: translateMetadataKey(value.i18nKey),
       value: key,
       color: value.color
     }));

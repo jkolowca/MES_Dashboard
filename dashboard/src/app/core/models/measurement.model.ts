@@ -28,7 +28,6 @@ export interface LiveMeasurement {
  */
 export interface MeasurementMetadata {
   i18nKey: string;
-  chartI18nKey: string;
   unit: string;
   min: number;
   max: number;
@@ -50,14 +49,6 @@ export function translateMetadataKey(i18nKey: string): string {
       return $localize`:@@MEASUREMENTS.PRESSURE:Coolant Pressure`;
     case 'MEASUREMENTS.FLOW_RATE':
       return $localize`:@@MEASUREMENTS.FLOW_RATE:Flow Rate`;
-    case 'CHART.INLET_TEMP':
-      return $localize`:@@CHART.INLET_TEMP:Inlet Temp`;
-    case 'CHART.OUTLET_TEMP':
-      return $localize`:@@CHART.OUTLET_TEMP:Outlet Temp`;
-    case 'CHART.PRESSURE':
-      return $localize`:@@CHART.PRESSURE:Pressure`;
-    case 'CHART.FLOW':
-      return $localize`:@@CHART.FLOW:Flow Rate`;
     default:
       return i18nKey;
   }
@@ -69,7 +60,6 @@ export function translateMetadataKey(i18nKey: string): string {
 export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
   inletTemperature: {
     i18nKey: 'MEASUREMENTS.INLET_TEMP',
-    chartI18nKey: 'CHART.INLET_TEMP',
     unit: '°C',
     min: 38,
     max: 47,
@@ -79,7 +69,6 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
   },
   outletTemperature: {
     i18nKey: 'MEASUREMENTS.OUTLET_TEMP',
-    chartI18nKey: 'CHART.OUTLET_TEMP',
     unit: '°C',
     min: 58,
     max: 67,
@@ -89,7 +78,6 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
   },
   coolantPressure: {
     i18nKey: 'MEASUREMENTS.PRESSURE',
-    chartI18nKey: 'CHART.PRESSURE',
     unit: 'bar',
     min: 1.5,
     max: 2.8,
@@ -99,7 +87,6 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
   },
   flowRate: {
     i18nKey: 'MEASUREMENTS.FLOW_RATE',
-    chartI18nKey: 'CHART.FLOW',
     unit: 'L/min',
     min: 90,
     max: 120,
