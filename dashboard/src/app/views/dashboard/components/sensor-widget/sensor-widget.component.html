@@ -1,5 +1,5 @@
 <p-card [header]="localizedName()">
-  <div [ngClass]="statusClass()">
+  <div [class]="statusClass()">
     <div class="sensor-content">
       <span class="sensor-value">{{ measurement().value }}</span>
       <span class="sensor-unit">{{ unit() }}</span>

@@ -1,5 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
-import { getChartDatasetOptions, getChartOptions, METRIC_OPTIONS, TIME_SPAN_OPTIONS } from './historical-chart.config';
+import { Component, computed, inject, signal, linkedSignal } from '@angular/core';
+import { getChartDatasetOptions, getChartOptions, TIME_SPAN_OPTIONS } from './historical-chart.config';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChartModule } from 'primeng/chart';
@@ -8,10 +8,10 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { MeasurementService } from '../../../../core/services/measurement.service';
 import { CardModule } from 'primeng/card';
 import { UiStateService } from '../../../../core/services/ui-state.service';
+import { translateMetadataKey } from '../../../../core/models/measurement.model';
 
 @Component({
   selector: 'app-historical-chart',
-  standalone: true,
   imports: [CommonModule, FormsModule, ChartModule, ToggleButtonModule, SelectButtonModule, CardModule],
   templateUrl: './historical-chart.component.html',
   styleUrl: './historical-chart.component.scss'
@@ -20,11 +20,22 @@ export class HistoricalChartComponent {
   public readonly measurementService = inject(MeasurementService);
   private readonly uiStateService = inject(UiStateService);
 
-  // Options for the toggle buttons (now acting as the legend)
-  public readonly metricOptions = METRIC_OPTIONS;
+  // Options for the toggle buttons (derived dynamically from API metadata)
+  public readonly metricOptions = computed(() => {
+    const meta = this.measurementService.metadata.value();
+    if (!meta) return [];
+    return Object.entries(meta).map(([key, value]) => ({
+      label: translateMetadataKey(value.chartI18nKey),
+      value: key,
+      color: value.color
+    }));
+  });
 
-  // Currently selected metrics (all on by default)
-  public selectedMetrics = signal<string[]>(['inletTemperature', 'outletTemperature', 'coolantPressure', 'flowRate']);
+  // Currently selected metrics (automatically defaults to all keys when metadata loads)
+  public selectedMetrics = linkedSignal({
+    source: this.measurementService.metadata.value,
+    computation: (meta): string[] => meta ? Object.keys(meta) : []
+  });
 
   public setMetric(metric: string, selected: boolean): void {
     const current = this.selectedMetrics();
@@ -65,9 +76,15 @@ export class HistoricalChartComponent {
 
     const datasets = filteredData.map(series => {
       const metadata = this.measurementService.metadata.value()?.[series.type];
-      const labelName = this.metricOptions.find(o => o.value === series.type)?.label || series.type;
+      const labelName = this.metricOptions().find(o => o.value === series.type)?.label || series.type;
 
-      return getChartDatasetOptions(series.type, labelName, metadata?.unit || '', series.data.map(d => d.value));
+      return getChartDatasetOptions(
+        labelName,
+        metadata?.unit || '',
+        series.data.map(d => d.value),
+        metadata?.color || '#94a3b8',
+        metadata?.axis || 'y'
+      );
     });
 
     return { labels, datasets };
@@ -75,6 +92,19 @@ export class HistoricalChartComponent {
 
   // Chart configuration
   public chartOptions = computed(() => {
-    return getChartOptions(this.selectedMetrics(), this.isMobile());
+    const meta = this.measurementService.metadata.value();
+    const selected = this.selectedMetrics();
+    const activeAxes: string[] = [];
+
+    if (meta) {
+      for (const key of selected) {
+        const axis = meta[key]?.axis;
+        if (axis && !activeAxes.includes(axis)) {
+          activeAxes.push(axis);
+        }
+      }
+    }
+
+    return getChartOptions(activeAxes, this.isMobile());
   });
 }

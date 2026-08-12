@@ -3,11 +3,10 @@ import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MeasurementService } from '../../../../core/services/measurement.service';
-import { LiveMeasurement } from '../../../../core/models/measurement.model';
+import { LiveMeasurement, translateMetadataKey } from '../../../../core/models/measurement.model';
 
 @Component({
   selector: 'app-sensor-widget',
-  standalone: true,
   imports: [CommonModule, CardModule, ProgressBarModule],
   templateUrl: './sensor-widget.component.html',
   styleUrl: './sensor-widget.component.scss'
@@ -57,14 +56,8 @@ export class SensorWidgetComponent {
   });
 
   public readonly localizedName = computed(() => {
-    const type = this.measurement().type;
-    switch (type) {
-      case 'inletTemperature': return $localize`:@@MEASUREMENTS.INLET_TEMP:Inlet Temperature`;
-      case 'outletTemperature': return $localize`:@@MEASUREMENTS.OUTLET_TEMP:Outlet Temperature`;
-      case 'coolantPressure': return $localize`:@@MEASUREMENTS.PRESSURE:Coolant Pressure`;
-      case 'flowRate': return $localize`:@@MEASUREMENTS.FLOW_RATE:Flow Rate`;
-      default: return type;
-    }
+    const meta = this.metadata();
+    return meta ? translateMetadataKey(meta.i18nKey) : this.measurement().type;
   });
 
   public readonly statusClass = computed(() => {

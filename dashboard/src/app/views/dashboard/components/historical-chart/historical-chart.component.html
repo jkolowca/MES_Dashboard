@@ -2,7 +2,7 @@
   <div class="chart-header">
     <div class="chart-controls">
       <div class="metric-selector">
-        @for (item of metricOptions; track item.value) {
+        @for (item of metricOptions(); track item.value) {
         <p-togglebutton [ngModel]="selectedMetrics().includes(item.value)"
           (ngModelChange)="setMetric(item.value, $event)">
           <ng-template #content>

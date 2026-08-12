@@ -61,22 +61,20 @@ export class MeasurementService {
       const diffMs = now.getTime() - start.getTime();
       const dataPoints = Math.max(1, Math.floor(diffMs / intervalMs));
 
-      return [
-        generateSeries('inletTemperature', 42, 1, dataPoints, intervalMs, start),
-        generateSeries('outletTemperature', 62, 1, dataPoints, intervalMs, start),
-        generateSeries('coolantPressure', 2.1, 0.1, dataPoints, intervalMs, start),
-        generateSeries('flowRate', 105, 2, dataPoints, intervalMs, start)
-      ];
+      return Object.keys(MOCK_METADATA).map(type => {
+        const meta = MOCK_METADATA[type];
+        const startValue = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
+        return generateSeries(type, startValue, meta.stepSize, dataPoints, intervalMs, start);
+      });
     }
   });
 
   /** Current state for the live random walk */
-  private currentLiveValues: Record<string, number> = {
-    inletTemperature: 42,
-    outletTemperature: 62,
-    coolantPressure: 2.1,
-    flowRate: 105
-  };
+  private currentLiveValues: Record<string, number> = Object.keys(MOCK_METADATA).reduce((acc, key) => {
+    const meta = MOCK_METADATA[key];
+    acc[key] = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
+    return acc;
+  }, {} as Record<string, number>);
 
   /**
    * Simulated WebSocket stream emitting new data every 2s.
@@ -85,15 +83,10 @@ export class MeasurementService {
     return interval(2000).pipe(
       map(() => {
         const date = new Date().toISOString();
-        const stepSizes: Record<string, number> = {
-          inletTemperature: 0.5,
-          outletTemperature: 0.5,
-          coolantPressure: 0.05,
-          flowRate: 1
-        };
 
         return Object.keys(this.currentLiveValues).map(type => {
-          this.currentLiveValues[type] = generateNextValue(type, this.currentLiveValues[type], stepSizes[type]);
+          const stepSize = MOCK_METADATA[type]?.stepSize || 1;
+          this.currentLiveValues[type] = generateNextValue(type, this.currentLiveValues[type], stepSize);
           return { type, value: this.currentLiveValues[type], date };
         });
       }),
