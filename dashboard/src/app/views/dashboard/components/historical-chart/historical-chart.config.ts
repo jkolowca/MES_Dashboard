@@ -41,7 +41,12 @@ export function getChartDatasetOptions(
   };
 }
 
-export function getChartOptions(activeAxes: string[], isMobile: boolean) {
+export function getChartOptions(
+  activeAxes: string[],
+  isMobile: boolean,
+  axisLimits?: Record<string, { min: number; max: number }>,
+  isDarkMode?: boolean
+) {
   const showTemp = activeAxes.includes('yTemperature');
   const showPressure = activeAxes.includes('yPressure');
   const showFlow = activeAxes.includes('yFlow');
@@ -50,10 +55,17 @@ export function getChartOptions(activeAxes: string[], isMobile: boolean) {
 
   const getGrid = (axis: string) => {
     if (activeAxes[0] === axis) {
-      return { color: 'rgba(0, 0, 0, 0.04)', drawBorder: false, drawTicks: false };
+      return {
+        color: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+        drawBorder: false,
+        drawTicks: false
+      };
     }
     return { display: false, drawOnChartArea: false, drawTicks: false };
   };
+
+  const textColor = isDarkMode ? '#cbd5e1' : '#475569';
+  const fontFamily = "'IBM Plex Sans', sans-serif";
 
   return {
     maintainAspectRatio: true,
@@ -69,8 +81,8 @@ export function getChartOptions(activeAxes: string[], isMobile: boolean) {
       },
       tooltip: {
         backgroundColor: 'rgba(15, 23, 42, 0.9)',
-        titleFont: { family: 'var(--font-family)', size: isMobile ? 11 : 13 },
-        bodyFont: { family: 'var(--font-family)', size: isMobile ? 11 : 13 },
+        titleFont: { family: fontFamily, size: isMobile ? 11 : 13 },
+        bodyFont: { family: fontFamily, size: isMobile ? 11 : 13 },
         padding: isMobile ? 8 : 12,
         cornerRadius: 8,
         boxPadding: 6,
@@ -80,9 +92,9 @@ export function getChartOptions(activeAxes: string[], isMobile: boolean) {
     scales: {
       x: {
         ticks: {
-          color: 'var(--p-text-color)',
+          color: textColor,
           maxTicksLimit: isMobile ? 3 : 8,
-          font: { family: 'var(--font-family)', size: isMobile ? 10 : 12 },
+          font: { family: fontFamily, size: isMobile ? 10 : 12 },
           padding: isMobile ? 5 : 10
         },
         grid: {
@@ -99,17 +111,20 @@ export function getChartOptions(activeAxes: string[], isMobile: boolean) {
         title: {
           display: !isMobile,
           text: 'Temperature (°C)',
-          color: 'var(--p-text-color)',
-          font: { family: 'var(--font-family)', size: 13, weight: '700' },
+          color: textColor,
+          font: { family: fontFamily, size: 13, weight: '700' },
           padding: { bottom: 10, top: 10 }
         },
         ticks: {
-          color: 'var(--p-text-color)',
-          font: { family: 'var(--font-family)', size: isMobile ? 10 : 12, weight: '500' },
-          padding: isMobile ? 5 : 10
+          color: textColor,
+          font: { family: fontFamily, size: isMobile ? 10 : 12, weight: '500' },
+          padding: isMobile ? 5 : 10,
+          includeBounds: true
         },
         grid: getGrid('yTemperature'),
-        border: { display: false }
+        border: { display: false },
+        min: axisLimits?.['yTemperature']?.min,
+        max: axisLimits?.['yTemperature']?.max
       },
       yPressure: {
         type: 'linear',
@@ -119,16 +134,19 @@ export function getChartOptions(activeAxes: string[], isMobile: boolean) {
           display: !isMobile,
           text: 'Pressure (bar)',
           color: '#6d28d9',
-          font: { family: 'var(--font-family)', size: 13, weight: '700' },
+          font: { family: fontFamily, size: 13, weight: '700' },
           padding: { bottom: 10, top: 10 }
         },
         ticks: {
           color: '#6d28d9',
-          font: { family: 'var(--font-family)', size: 12, weight: '500' },
-          padding: isMobile ? 5 : 10
+          font: { family: fontFamily, size: 12, weight: '500' },
+          padding: isMobile ? 5 : 10,
+          includeBounds: true
         },
         grid: getGrid('yPressure'),
-        border: { display: false }
+        border: { display: false },
+        min: axisLimits?.['yPressure']?.min,
+        max: axisLimits?.['yPressure']?.max
       },
       yFlow: {
         type: 'linear',
@@ -138,16 +156,19 @@ export function getChartOptions(activeAxes: string[], isMobile: boolean) {
           display: !isMobile,
           text: 'Flow (L/min)',
           color: '#047857',
-          font: { family: 'var(--font-family)', size: 13, weight: '700' },
+          font: { family: fontFamily, size: 13, weight: '700' },
           padding: { bottom: 10, top: 10 }
         },
         ticks: {
           color: '#047857',
-          font: { family: 'var(--font-family)', size: 12, weight: '500' },
-          padding: isMobile ? 5 : 10
+          font: { family: fontFamily, size: 12, weight: '500' },
+          padding: isMobile ? 5 : 10,
+          includeBounds: true
         },
         grid: getGrid('yFlow'),
-        border: { display: false }
+        border: { display: false },
+        min: axisLimits?.['yFlow']?.min,
+        max: axisLimits?.['yFlow']?.max
       }
     }
   };

@@ -105,6 +105,24 @@ export class HistoricalChartComponent {
       }
     }
 
-    return getChartOptions(activeAxes, this.isMobile());
+    const axisLimits: Record<string, { min: number; max: number }> = {};
+    if (meta) {
+      for (const axis of activeAxes) {
+        const metricsForAxis = selected.filter(key => meta[key]?.axis === axis);
+        if (metricsForAxis.length > 0) {
+          const mins = metricsForAxis.map(key => meta[key].min);
+          const maxs = metricsForAxis.map(key => meta[key].max);
+          const minVal = Math.min(...mins);
+          const maxVal = Math.max(...maxs);
+          const range = maxVal - minVal;
+          axisLimits[axis] = {
+            min: +(minVal - 0.1 * range).toFixed(2),
+            max: +(maxVal + 0.1 * range).toFixed(2)
+          };
+        }
+      }
+    }
+
+    return getChartOptions(activeAxes, this.isMobile(), axisLimits, this.uiStateService.isDarkMode());
   });
 }
