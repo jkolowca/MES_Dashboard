@@ -1,4 +1,4 @@
-import { Component, inject, Inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { UiStateService } from '../../../core/services/ui-state.service';
 import { UserService } from '../../../core/services/user.service';

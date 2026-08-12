@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiStateService } from '../../core/services/ui-state.service';
 import { NavigationService } from '../../core/services/navigation.service';
 import { ButtonModule } from 'primeng/button';
