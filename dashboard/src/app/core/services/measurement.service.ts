@@ -1,4 +1,4 @@
-import { Service, resource, signal, WritableSignal } from '@angular/core';
+import { Service, resource, signal, WritableSignal, linkedSignal, computed } from '@angular/core';
 import { MeasurementSeries, LiveMeasurement, DataPoint, MeasurementMetadata, MOCK_METADATA } from '../models/measurement.model';
 import { interval, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -30,6 +30,27 @@ export class MeasurementService {
   public timeSpan = signal<number>(8 * 60 * 60 * 1000);
 
   /**
+   * Calculated temporal resolution in milliseconds based on selected time span.
+   */
+  public readonly currentResolutionMs = computed(() => {
+    const span = this.timeSpan();
+    const rawInterval = span / 90;
+    
+    const NICE_INTERVALS = [
+      60 * 1000,          // 1 minute
+      5 * 60 * 1000,      // 5 minutes
+      15 * 60 * 1000,     // 15 minutes
+      30 * 60 * 1000,     // 30 minutes
+      60 * 60 * 1000,     // 1 hour
+      2 * 60 * 60 * 1000  // 2 hours
+    ];
+
+    return NICE_INTERVALS.reduce((prev, curr) => 
+      Math.abs(curr - rawInterval) < Math.abs(prev - rawInterval) ? curr : prev
+    );
+  });
+
+  /**
    * Simulated REST API returning historical data series.
    */
   public historicalData = resource<MeasurementSeries[], number>({
@@ -39,23 +60,7 @@ export class MeasurementService {
 
       const now = new Date();
       const start = new Date(now.getTime() - span);
-      // Calculate target interval based on desired number of points (~90 points)
-      const rawInterval = span / 90;
-      
-      // Standard human-readable intervals
-      const NICE_INTERVALS = [
-        60 * 1000,          // 1 minute
-        5 * 60 * 1000,      // 5 minutes
-        15 * 60 * 1000,     // 15 minutes
-        30 * 60 * 1000,     // 30 minutes
-        60 * 60 * 1000,     // 1 hour
-        2 * 60 * 60 * 1000  // 2 hours
-      ];
-
-      // Find the closest standard interval
-      const intervalMs = NICE_INTERVALS.reduce((prev, curr) => 
-        Math.abs(curr - rawInterval) < Math.abs(prev - rawInterval) ? curr : prev
-      );
+      const intervalMs = this.currentResolutionMs();
 
       // Calculate how many data points are between the start and end dates
       const diffMs = now.getTime() - start.getTime();
@@ -69,6 +74,15 @@ export class MeasurementService {
     }
   });
 
+  /**
+   * Linked signal holding the active historical chart data,
+   * automatically resetting when historicalData resource resolves.
+   */
+  public readonly activeChartData = linkedSignal<MeasurementSeries[] | undefined, MeasurementSeries[]>({
+    source: () => this.historicalData.value(),
+    computation: (data) => data ? JSON.parse(JSON.stringify(data)) : []
+  });
+
   /** Current state for the live random walk */
   private currentLiveValues: Record<string, number> = Object.keys(MOCK_METADATA).reduce((acc, key) => {
     const meta = MOCK_METADATA[key];
@@ -77,10 +91,10 @@ export class MeasurementService {
   }, {} as Record<string, number>);
 
   /**
-   * Simulated WebSocket stream emitting new data every 2s.
+   * Simulated WebSocket stream emitting new data every 1s.
    */
   public getLiveUpdates(): Observable<LiveMeasurement[]> {
-    return interval(2000).pipe(
+    return interval(1000).pipe(
       map(() => {
         const date = new Date().toISOString();
 
@@ -92,8 +106,66 @@ export class MeasurementService {
       }),
       tap(measurements => {
         this.latestLiveMeasurements.set(measurements);
+        this.updateActiveChartData(measurements);
       })
     );
+  }
+
+  /**
+   * Updates the active chart data series with the latest live measurements,
+   * respecting the temporal resolution and maintaining a sliding window of timeSpan.
+   */
+  private updateActiveChartData(measurements: LiveMeasurement[]): void {
+    const currentData = this.activeChartData();
+    if (!currentData || currentData.length === 0) {
+      return;
+    }
+
+    const resolutionMs = this.currentResolutionMs();
+    const span = this.timeSpan();
+    const nowTime = new Date().getTime();
+    const cutoff = nowTime - span;
+
+    this.activeChartData.update(seriesList => {
+      return seriesList.map(series => {
+        const measurement = measurements.find(m => m.type === series.type);
+        if (!measurement) {
+          return series;
+        }
+
+        const dataPoints = [...series.data];
+        if (dataPoints.length === 0) {
+          dataPoints.push({ date: measurement.date, value: measurement.value });
+        } else {
+          const lastPoint = dataPoints[dataPoints.length - 1];
+          const lastTime = new Date(lastPoint.date).getTime();
+          const newTime = new Date(measurement.date).getTime();
+          const diff = newTime - lastTime;
+
+          if (diff < resolutionMs) {
+            // Within the same bucket: update the last point's value and date
+            dataPoints[dataPoints.length - 1] = {
+              date: measurement.date,
+              value: measurement.value
+            };
+          } else {
+            // New bucket: append new point
+            dataPoints.push({
+              date: measurement.date,
+              value: measurement.value
+            });
+          }
+        }
+
+        // Keep only points within the sliding time window
+        const trimmedPoints = dataPoints.filter(dp => new Date(dp.date).getTime() >= cutoff);
+
+        return {
+          ...series,
+          data: trimmedPoints
+        };
+      });
+    });
   }
 }
 

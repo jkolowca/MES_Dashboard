@@ -54,7 +54,7 @@ export class HistoricalChartComponent {
 
   // Format historical data for Chart.js
   public chartData = computed(() => {
-    const rawData = this.measurementService.historicalData.value();
+    const rawData = this.measurementService.activeChartData();
     if (!rawData || rawData.length === 0) return { labels: [], datasets: [] };
 
     const selected = this.selectedMetrics();
