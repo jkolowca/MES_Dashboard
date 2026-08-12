@@ -1,7 +1,7 @@
 import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
+import Lara from '@primeuix/themes/lara';
 
-export const AppPreset = definePreset(Aura, {
+export const AppPreset = definePreset(Lara, {
     semantic: {
         primary: {
             50: '{indigo.50}',

@@ -1,0 +1,34 @@
+<p-card i18n-header header="Historical Telemetry Data">
+  <div class="chart-header">
+    <div class="chart-controls">
+      <div class="metric-selector">
+        @for (item of metricOptions; track item.value) {
+        <p-togglebutton [ngModel]="selectedMetrics().includes(item.value)"
+          (ngModelChange)="setMetric(item.value, $event)">
+          <ng-template #content>
+            <div class="legend-item">
+              <span class="legend-dot" [style.backgroundColor]="item.color"></span>
+              <span>{{ item.label }}</span>
+            </div>
+          </ng-template>
+        </p-togglebutton>
+        }
+      </div>
+
+      <p-selectbutton [options]="timeSpanOptions" [ngModel]="measurementService.timeSpan()"
+        (ngModelChange)="$event ? measurementService.timeSpan.set($event) : null" optionLabel="label"
+        optionValue="value" [allowEmpty]="false" styleClass="time-selector">
+      </p-selectbutton>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    @if (measurementService.historicalData.isLoading()) {
+    <div class="loading-overlay">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+      <span i18n>Loading historical data...</span>
+    </div>
+    }
+    <p-chart type="line" [data]="chartData()" [options]="chartOptions()"></p-chart>
+  </div>
+</p-card>

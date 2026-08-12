@@ -1,0 +1,27 @@
+<p-card [header]="localizedName()">
+  <div [ngClass]="statusClass()">
+    <div class="sensor-content">
+      <span class="sensor-value">{{ measurement().value }}</span>
+      <span class="sensor-unit">{{ unit() }}</span>
+
+      @if (trend() === 'up') {
+      <i class="pi pi-arrow-up trend-icon trend-up"></i>
+      } @else if (trend() === 'down') {
+      <i class="pi pi-arrow-down trend-icon trend-down"></i>
+      } @else if (trend() === 'none') {
+      <i class="pi pi-minus trend-icon trend-none"></i>
+      }
+    </div>
+    <div class="sensor-progress">
+      <div class="sensor-progress-labels">
+        <span>{{ min() }}</span>
+        <span>{{ max() }}</span>
+      </div>
+      <p-progressbar [value]="percentage()" [showValue]="false" styleClass="sensor-bar">
+      </p-progressbar>
+    </div>
+    <div class="sensor-date font-mono">
+      {{ measurement().date | date:'mediumTime' }}
+    </div>
+  </div>
+</p-card>

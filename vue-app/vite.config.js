@@ -22,18 +22,15 @@ export default defineConfig({
     postcss: {
       plugins: [
         prefixer({
-          prefix: 'hello-vue',
+          prefix: 'vue-alarms-widget',
           transform(prefix, selector, prefixedSelector, filePath) {
-            if (selector.startsWith('hello-vue')) {
-              return selector;
-            }
-            if (selector === 'body' || selector === 'html') {
-              return 'hello-vue';
-            }
-            if (selector.startsWith(':root')) {
-              return selector.replace(':root', 'hello-vue');
-            }
-            return prefixedSelector;
+            // Scope dark theme to .app-dark, and light theme to everything else
+            const isDark = filePath?.includes('dark');
+            const scope = isDark ? '.app-dark vue-alarms-widget' : 'html:not(.app-dark) vue-alarms-widget';
+            
+            if (selector === 'body' || selector === 'html') return scope;
+            if (selector.startsWith(':root')) return selector.replace(':root', scope);
+            return prefixedSelector.replace(prefix, scope);
           }
         })
       ]

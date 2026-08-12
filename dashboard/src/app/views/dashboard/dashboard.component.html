@@ -1,0 +1,13 @@
+<div class="dashboard-container">
+  <div class="sensor-grid">
+    @for (measurement of measurementService.latestLiveMeasurements(); track measurement.type) {
+    <app-sensor-widget [measurement]="measurement"></app-sensor-widget>
+    }
+  </div>
+
+  <app-historical-chart></app-historical-chart>
+  @defer {
+  <vue-alarms-widget [alarms]="alarmService.alarms()"
+    (acknowledge-all)="alarmService.acknowledgeAll()"></vue-alarms-widget>
+  }
+</div>

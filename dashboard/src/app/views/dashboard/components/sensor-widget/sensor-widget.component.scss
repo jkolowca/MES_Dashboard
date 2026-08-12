@@ -1,0 +1,104 @@
+::ng-deep .p-card .p-card-body {
+  padding: 1.5rem;
+}
+
+::ng-deep .p-card .p-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  ::ng-deep .p-card .p-card-body {
+    padding: 1rem;
+  }
+  
+  ::ng-deep .p-card .p-card-title {
+    font-size: 1rem;
+    line-height: 1.2;
+    word-wrap: break-word;
+  }
+
+  .sensor-value {
+    font-size: 1.5rem !important;
+  }
+
+  .sensor-unit {
+    font-size: 0.85rem !important;
+  }
+}
+
+.sensor-content {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sensor-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  transition: color 0.3s;
+}
+
+::ng-deep .status-normal .sensor-value {
+  color: var(--p-primary-color);
+}
+
+::ng-deep .status-warning {
+  .sensor-value {
+    color: var(--p-orange-500, #f59e0b) !important;
+  }
+
+  .p-progressbar-value {
+    background: var(--p-orange-500, #f59e0b) !important;
+  }
+}
+
+::ng-deep .status-danger {
+  .sensor-value {
+    color: var(--p-red-500, #ef4444) !important;
+  }
+
+  .p-progressbar-value {
+    background: var(--p-red-500, #ef4444) !important;
+  }
+}
+
+.trend-icon {
+  font-size: 1.25rem;
+  margin-left: auto;
+  align-self: center;
+  color: var(--p-text-muted-color, #888);
+  transition: color 0.3s, transform 0.3s;
+}
+
+.sensor-unit {
+  font-size: 1.2rem;
+  color: var(--p-text-muted-color, #888);
+}
+
+.sensor-progress {
+  margin-top: 1rem;
+}
+
+.sensor-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color, #888);
+  margin-bottom: 0.25rem;
+}
+
+::ng-deep .sensor-bar {
+  height: 6px !important;
+  border-radius: 4px;
+}
+
+.sensor-date {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color, #aaa);
+  margin-top: 1rem;
+  margin-left: auto;
+  max-width: fit-content;
+}

@@ -1,0 +1,111 @@
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.chart-wrapper {
+  position: relative;
+  display: block;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: rgba(var(--p-surface-0-rgb), 0.7);
+  color: var(--p-text-muted-color);
+  z-index: 10;
+}
+
+.chart-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.metric-selector {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+::ng-deep .time-selector .p-button {
+  padding: 0.5rem 1rem;
+}
+
+::ng-deep .metric-selector .p-togglebutton {
+  padding: 0.5rem 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+}
+
+@media (max-width: 768px) {
+  .chart-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chart-controls {
+    align-items: stretch;
+  }
+
+  .metric-selector {
+    justify-content: center;
+  }
+
+  ::ng-deep .time-selector {
+    display: flex;
+  }
+
+  ::ng-deep .time-selector .p-button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  ::ng-deep .metric-selector p-togglebutton {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+
+  ::ng-deep .metric-selector .p-togglebutton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  ::ng-deep .metric-selector p-togglebutton {
+    flex: 1 1 100%;
+  }
+}

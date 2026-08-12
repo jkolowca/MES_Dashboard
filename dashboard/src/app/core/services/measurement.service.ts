@@ -25,36 +25,58 @@ export class MeasurementService {
   });
 
   /**
-   * Signal holding the current date range for historical data requests.
-   * Changing this signal will automatically trigger the resource to fetch new data.
-   * Initial range: 1 hour.
+   * Selected time span for historical data in milliseconds.
    */
-  public historicalDataRange: WritableSignal<{ start: Date; end: Date }> = signal({
-    start: new Date(Date.now() - 60 * 60 * 1000),
-    end: new Date()
-  });
+  public timeSpan = signal<number>(8 * 60 * 60 * 1000);
 
   /**
    * Simulated REST API returning historical data series.
    */
-  public historicalData = resource<MeasurementSeries[], { start: Date; end: Date }>({
-    params: () => this.historicalDataRange(),
-    loader: async ({ params: range }) => {
+  public historicalData = resource<MeasurementSeries[], number>({
+    params: () => this.timeSpan(),
+    loader: async ({ params: span }) => {
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Calculate how many data points are between the start and end dates (1 minute intervals)
-      const diffMs = range.end.getTime() - range.start.getTime();
-      const intervalMs = 60000;
+      const now = new Date();
+      const start = new Date(now.getTime() - span);
+      // Calculate target interval based on desired number of points (~90 points)
+      const rawInterval = span / 90;
+      
+      // Standard human-readable intervals
+      const NICE_INTERVALS = [
+        60 * 1000,          // 1 minute
+        5 * 60 * 1000,      // 5 minutes
+        15 * 60 * 1000,     // 15 minutes
+        30 * 60 * 1000,     // 30 minutes
+        60 * 60 * 1000,     // 1 hour
+        2 * 60 * 60 * 1000  // 2 hours
+      ];
+
+      // Find the closest standard interval
+      const intervalMs = NICE_INTERVALS.reduce((prev, curr) => 
+        Math.abs(curr - rawInterval) < Math.abs(prev - rawInterval) ? curr : prev
+      );
+
+      // Calculate how many data points are between the start and end dates
+      const diffMs = now.getTime() - start.getTime();
       const dataPoints = Math.max(1, Math.floor(diffMs / intervalMs));
 
       return [
-        generateSeries('inletTemperature', 40, 5, dataPoints, intervalMs, range.start),
-        generateSeries('outletTemperature', 60, 5, dataPoints, intervalMs, range.start),
-        generateSeries('coolantPressure', 2, 0.5, dataPoints, intervalMs, range.start),
-        generateSeries('flowRate', 100, 10, dataPoints, intervalMs, range.start)
+        generateSeries('inletTemperature', 42, 1, dataPoints, intervalMs, start),
+        generateSeries('outletTemperature', 62, 1, dataPoints, intervalMs, start),
+        generateSeries('coolantPressure', 2.1, 0.1, dataPoints, intervalMs, start),
+        generateSeries('flowRate', 105, 2, dataPoints, intervalMs, start)
       ];
     }
   });
+
+  /** Current state for the live random walk */
+  private currentLiveValues: Record<string, number> = {
+    inletTemperature: 42,
+    outletTemperature: 62,
+    coolantPressure: 2.1,
+    flowRate: 105
+  };
 
   /**
    * Simulated WebSocket stream emitting new data every 2s.
@@ -63,40 +85,66 @@ export class MeasurementService {
     return interval(2000).pipe(
       map(() => {
         const date = new Date().toISOString();
-        return [
-          { type: 'inletTemperature', value: calculateRandomValue(40, 5), date },
-          { type: 'outletTemperature', value: calculateRandomValue(60, 5), date },
-          { type: 'coolantPressure', value: calculateRandomValue(2, 0.5), date },
-          { type: 'flowRate', value: calculateRandomValue(100, 10), date }
-        ];
+        const stepSizes: Record<string, number> = {
+          inletTemperature: 0.5,
+          outletTemperature: 0.5,
+          coolantPressure: 0.05,
+          flowRate: 1
+        };
+
+        return Object.keys(this.currentLiveValues).map(type => {
+          this.currentLiveValues[type] = generateNextValue(type, this.currentLiveValues[type], stepSizes[type]);
+          return { type, value: this.currentLiveValues[type], date };
+        });
       }),
-      tap(measurements => this.latestLiveMeasurements.set(measurements))
+      tap(measurements => {
+        this.latestLiveMeasurements.set(measurements);
+      })
     );
   }
 }
 
 /**
- * Generates a historical data series.
+ * Generates a historical data series using a random walk.
  */
 function generateSeries(
   type: string,
-  baseValue: number,
-  variance: number,
+  startValue: number,
+  stepSize: number,
   dataPoints: number,
   intervalMs: number,
   startDate: Date = new Date()): MeasurementSeries {
   const data: DataPoint[] = [];
+  let currentValue = startValue;
+
   for (let i = 0; i <= dataPoints; i++) {
     const date = new Date(startDate.getTime() + i * intervalMs).toISOString();
-    const value = calculateRandomValue(baseValue, variance);
-    data.push({ date, value });
+    currentValue = generateNextValue(type, currentValue, stepSize);
+    data.push({ date, value: currentValue });
   }
   return { type, data };
 }
 
 /**
- * Calculates a random value within a given variance.
+ * Calculates the next value in a random walk, with occasional edge cases and soft boundaries.
  */
-function calculateRandomValue(baseValue: number, variance: number): number {
-  return +(Math.random() * variance + baseValue).toFixed(2);
+function generateNextValue(type: string, current: number, stepSize: number): number {
+  const { min, max } = MOCK_METADATA[type];
+
+  // 1% chance of an edge case spike
+  if (Math.random() < 0.01) {
+    return +(Math.random() > 0.5 ? max + stepSize : min - stepSize).toFixed(2);
+  }
+
+  // Simple random walk
+  let next = current + (Math.random() - 0.5) * stepSize;
+
+  // Keep it mostly in the safe zone
+  const safeMax = max - (max - min) * 0.2;
+  const safeMin = min + (max - min) * 0.2;
+
+  if (next > safeMax) next -= stepSize;
+  if (next < safeMin) next += stepSize;
+
+  return +next.toFixed(2);
 }
