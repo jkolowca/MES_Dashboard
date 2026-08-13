@@ -6,7 +6,6 @@ This repository contains a responsive Web SPA dashboard for a production worksta
 
 ### Core Framework
 - **Angular 22** (Standalone Components, Signals, new Control Flow)
-- **TypeScript**
 
 ### Vue Integration (Web Components)
 - **Vue 2.7 (Composition API)**: Embedded seamlessly into the Angular application as a Custom Element (Web Component).
@@ -22,7 +21,8 @@ This repository contains a responsive Web SPA dashboard for a production worksta
 ### Infrastructure
 - Progressive Web App (**PWA**) enabled.
 - Fully localized (EN/PL) using **@angular/localize**.
-- Multi-stage Docker build ready for Nginx deployment.
+- Multi-stage Docker build served via **Nginx**.
+- Deployed on [Render.com](https://mes-dashboard-mjfs.onrender.com). (Docker runtime).
 - **GitHub Actions** CI pipeline with strict **Angular ESLint** code quality gates.
 
 ---
@@ -33,28 +33,53 @@ This repository contains a responsive Web SPA dashboard for a production worksta
 - Node.js (v22+)
 - npm
 
-### Installation
-1. Clone the repository
-2. Navigate to the Angular dashboard app:
-   ```bash
-   cd dashboard
-   npm install
-   ```
+### 1. Environment Setup
 
-### Environment Setup
-Since the application relies on a PrimeUI license, you must create a local environment file that is ignored by Git.
-Create a file at `dashboard/src/environments/environment.ts` with the following content:
+The application requires a PrimeUI license key, which is kept out of version control.
 
-```typescript
-export const environment = {
-  production: false,
-  primeuiLicense: 'YOUR_PRIMEUI_LICENSE_KEY'
-};
+Copy the example file and fill in your values:
+```bash
+cp .env.example .env
+# edit .env and set your PRIMEUI_LICENSE value
 ```
 
-### Running the Development Server
-Run the Angular development server:
+Then generate `dashboard/src/environments/environment.ts` from the template:
 ```bash
+node setup-env.js
+```
+
+> The `.env` file and `environment.ts` are both git-ignored. Run `setup-env.js` whenever you clone the repo or change `.env`.
+
+### 2. Build the Vue Web Component
+
+The Angular app embeds a Vue component as a Custom Element. Build it first:
+```bash
+cd vue-app
+npm install
+npm run build
+cd ..
+```
+
+### 3. Run the Development Server
+```bash
+cd dashboard
+npm install
 npm run start
 ```
-Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Navigate to `http://localhost:4200/`. The application auto-reloads on file changes.
+
+---
+
+## Docker
+
+Build and run the full application in a container (multi-stage build: Vue → Angular → Nginx):
+
+```bash
+docker build \
+  --build-arg PRIMEUI_LICENSE=<your_license_key> \
+  -t dashboard .
+
+docker run -p 8080:80 dashboard
+```
+
+Navigate to `http://localhost:8080/`.
