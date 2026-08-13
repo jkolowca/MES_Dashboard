@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Service, computed, inject } from '@angular/core';
 import { UserService } from './user.service';
 
 /** Defines the structure for a navigation menu item. */
@@ -12,9 +12,7 @@ export interface MenuItem {
 /**
  * Mock navigation service that filters menu items based on user role.
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class NavigationService {
   private readonly userService = inject(UserService);
 

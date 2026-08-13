@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Service, signal } from '@angular/core';
 
 /** Defines available user roles for RBAC. */
 export type UserRole = 'operator' | 'admin' | 'maintenance';
@@ -12,9 +12,7 @@ export interface User {
 /**
  * Mock user service to demonstrate RBAC and profile handling.
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class UserService {
   /** Signal holding the current user profile. */
   public readonly currentUser = signal<User>({
