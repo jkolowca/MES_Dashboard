@@ -1,5 +1,6 @@
-import { Service, signal, effect, inject } from '@angular/core';
+import { Service, inject, linkedSignal } from '@angular/core';
 import { MeasurementService } from './measurement.service';
+import { LiveMeasurement } from '../models/measurement.model';
 
 export interface SystemAlarm {
   statusType: 'danger' | 'warning' | 'info';
@@ -9,77 +10,72 @@ export interface SystemAlarm {
   metricType?: string;
 }
 
+const INITIAL_ALARMS: SystemAlarm[] = [
+  {
+    statusType: 'danger',
+    statusLabel: $localize`Critical`,
+    alarmMessage: $localize`Pressure exceeds safety limits in sector 7G`,
+    time: '10:45:02'
+  },
+  {
+    statusType: 'warning',
+    statusLabel: $localize`Warning`,
+    alarmMessage: $localize`Coolant flow rate below optimal threshold`,
+    time: '10:42:15'
+  },
+  {
+    statusType: 'info',
+    statusLabel: $localize`Info`,
+    alarmMessage: $localize`Routine maintenance scheduled for pump 3`,
+    time: '09:00:00'
+  }
+];
+
 @Service()
 export class AlarmService {
   private readonly measurementService = inject(MeasurementService);
 
-  public alarms = signal<SystemAlarm[]>([
-    {
-      statusType: 'danger',
-      statusLabel: $localize`Critical`,
-      alarmMessage: $localize`Pressure exceeds safety limits in sector 7G`,
-      time: '10:45:02'
-    },
-    {
-      statusType: 'warning',
-      statusLabel: $localize`Warning`,
-      alarmMessage: $localize`Coolant flow rate below optimal threshold`,
-      time: '10:42:15'
-    },
-    {
-      statusType: 'info',
-      statusLabel: $localize`Info`,
-      alarmMessage: $localize`Routine maintenance scheduled for pump 3`,
-      time: '09:00:00'
-    }
-  ]);
-
-  constructor() {
-    // Monitor live measurements to generate new alarms
-    effect(() => {
-      const measurements = this.measurementService.latestLiveMeasurements();
+  /**
+   * Linked signal derived from live measurements, which can also be written to (e.g., cleared).
+   * Automatically monitors incoming telemetry and appends new critical alarms.
+   */
+  public readonly alarms = linkedSignal<LiveMeasurement[], SystemAlarm[]>({
+    source: () => this.measurementService.latestLiveMeasurements(),
+    computation: (measurements, previous) => {
+      // If we have previous alarms state, carry them over; otherwise, initialize with mock alarms
+      const currentAlarms = previous ? [...previous.value] : [...INITIAL_ALARMS];
       const metadata = this.measurementService.metadata.value();
 
-      if (!measurements || !metadata) return;
+      if (!measurements || measurements.length === 0 || !metadata) {
+        return currentAlarms;
+      }
 
       measurements.forEach(m => {
         const meta = metadata[m.type];
         if (!meta) return;
 
         if (m.value < meta.min || m.value > meta.max) {
-          this.triggerAlarm(m.type, m.value, meta.min, meta.max);
+          // Prevent spamming: Check if there's already an active critical alarm for this metric
+          if (!currentAlarms.some(a => a.metricType === m.type)) {
+            const time = new Date().toLocaleTimeString();
+            const message = m.value > meta.max
+              ? $localize`${m.type} is too high (${m.value}:value:). Max allowed is ${meta.max}:max:.`
+              : $localize`${m.type} is too low (${m.value}:value:). Min allowed is ${meta.min}:min:.`;
+
+            currentAlarms.unshift({
+              statusType: 'danger',
+              statusLabel: $localize`Critical`,
+              alarmMessage: message,
+              time,
+              metricType: m.type
+            });
+          }
         }
       });
-    }, { allowSignalWrites: true });
-  }
 
-  private triggerAlarm(metricType: string, value: number, min: number, max: number) {
-    const currentAlarms = this.alarms();
-    // Prevent spamming: Check if there's already an active critical alarm for this metric
-    if (currentAlarms.some(a => a.metricType === metricType)) {
-      return;
+      return currentAlarms;
     }
-
-    const time = new Date().toLocaleTimeString();
-    let message = '';
-
-    if (value > max) {
-      message = $localize`${metricType} is too high (${value}:value:). Max allowed is ${max}:max:.`;
-    } else {
-      message = $localize`${metricType} is too low (${value}:value:). Min allowed is ${min}:min:.`;
-    }
-
-    this.alarms.update(alarms => [
-      {
-        statusType: 'danger',
-        statusLabel: $localize`Critical`,
-        alarmMessage: message,
-        time,
-        metricType
-      },
-      ...alarms
-    ]);
-  }
+  });
 
   public acknowledgeAll(): void {
     this.alarms.set([]);
