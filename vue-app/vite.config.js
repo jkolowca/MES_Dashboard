@@ -5,6 +5,9 @@ import prefixer from 'postcss-prefix-selector';
 
 export default defineConfig({
   plugins: [vue()],
+  define: {
+    'process.env.NODE_ENV': JSON.stringify('production')
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -13,9 +16,6 @@ export default defineConfig({
       name: 'VueWebComponents',
       fileName: 'web-components',
       formats: ['iife']
-    },
-    define: {
-      'process.env.NODE_ENV': JSON.stringify('production')
     }
   },
   css: {
