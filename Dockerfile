@@ -1,5 +1,6 @@
+FROM node:26-alpine as base
 # Stage 1: Build Vue Custom Element Web Component
-FROM node:20-alpine AS vue-builder
+FROM base AS vue-builder
 WORKDIR /app/vue-app
 COPY vue-app/package*.json ./
 RUN npm ci
@@ -7,7 +8,7 @@ COPY vue-app/ ./
 RUN npm run build
 
 # Stage 2: Build Angular Dashboard Application
-FROM node:20-alpine AS angular-builder
+FROM base AS angular-builder
 WORKDIR /app
 COPY dashboard/package*.json ./dashboard/
 WORKDIR /app/dashboard
@@ -24,7 +25,7 @@ COPY dashboard/ ./dashboard/
 ARG PRIMEUI_LICENSE=""
 RUN apk add --no-cache gettext && \
     envsubst < /app/dashboard/src/environments/environment.template.ts \
-              > /app/dashboard/src/environments/environment.ts
+    > /app/dashboard/src/environments/environment.ts
 
 WORKDIR /app/dashboard
 RUN npm run build
