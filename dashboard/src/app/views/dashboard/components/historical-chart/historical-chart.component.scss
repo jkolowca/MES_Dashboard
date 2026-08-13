@@ -11,10 +11,7 @@
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
-
-  .p-selectbutton {
-    margin-left: auto;
-  }
+  gap: 0.5rem;
 }
 
 .chart-title {

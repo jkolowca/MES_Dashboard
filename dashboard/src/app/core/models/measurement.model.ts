@@ -47,7 +47,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     max: 47,
     color: '#3b82f6',
     axis: 'yTemperature',
-    stepSize: 0.5
+    stepSize: 1
   },
   outletTemperature: {
     name: $localize`Outlet Temperature`,
@@ -56,16 +56,16 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     max: 67,
     color: '#f59e0b',
     axis: 'yTemperature',
-    stepSize: 0.5
+    stepSize: 1
   },
   coolantPressure: {
     name: $localize`Coolant Pressure`,
     unit: 'bar',
     min: 1.5,
-    max: 2.8,
+    max: 2.1,
     color: '#8b5cf6',
     axis: 'yPressure',
-    stepSize: 0.05
+    stepSize: 0.1
   },
   flowRate: {
     name: $localize`Flow Rate`,
@@ -74,6 +74,6 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     max: 120,
     color: '#10b981',
     axis: 'yFlow',
-    stepSize: 1
+    stepSize: 2
   }
 };

@@ -1,8 +1,8 @@
 export const TIME_SPAN_OPTIONS = [
+  { label: '10M', value: 10 * 60 * 1000 },
   { label: '1H', value: 60 * 60 * 1000 },
   { label: '8H', value: 8 * 60 * 60 * 1000 },
   { label: '24H', value: 24 * 60 * 60 * 1000 },
-  { label: '7D', value: 7 * 24 * 60 * 60 * 1000 }
 ];
 
 function hexToRgba(hex: string, alpha: number): string {

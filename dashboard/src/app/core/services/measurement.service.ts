@@ -19,13 +19,13 @@ export class MeasurementService {
     }
   });
 
-  /** Selected chart time span (default: 8 hours). */
-  public readonly timeSpan = signal<number>(8 * 60 * 60 * 1000);
+  /** Selected chart time span (default: 10 minutes). */
+  public readonly timeSpan = signal<number>(10 * 60 * 1000);
 
   /** Maps the selected timeSpan to a clean data point resolution. */
   public readonly currentResolutionMs = computed(() => {
     const span = this.timeSpan();
-    return span / 60;
+    return span / 120;
   });
 
   /** Historical data loaded from simulated API based on selected timeSpan. */
@@ -54,7 +54,7 @@ export class MeasurementService {
   /** Current state of live values for random walk simulation. */
   private readonly currentLiveValues: Record<string, number> = Object.keys(MOCK_METADATA).reduce((acc, key) => {
     const meta = MOCK_METADATA[key];
-    acc[key] = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
+    acc[key] = +((meta.min + meta.max) / 2).toFixed(2);
     return acc;
   }, {} as Record<string, number>);
 
@@ -65,11 +65,7 @@ export class MeasurementService {
         const date = new Date().toISOString();
         return Object.keys(this.currentLiveValues).map(type => {
           const meta = MOCK_METADATA[type];
-          // Simple random walk clamped to safe boundaries
-          const step = (Math.random() - 0.5) * meta.stepSize;
-          const nextVal = Math.max(meta.min, Math.min(meta.max, this.currentLiveValues[type] + step));
-          this.currentLiveValues[type] = +nextVal.toFixed(2);
-
+          this.currentLiveValues[type] = getNextSimulationValue(this.currentLiveValues[type], meta);
           return { type, value: this.currentLiveValues[type], date };
         });
       }),
@@ -78,35 +74,36 @@ export class MeasurementService {
     { initialValue: [] as LiveMeasurement[] }
   );
 
-  /** Updates the active chart data series with the latest live measurements. */
+  /** Updates the active chart data series with the latest live measurements only on tick boundaries. */
   private updateActiveChartData(measurements: LiveMeasurement[]): void {
     const currentData = this.activeChartData();
     if (!currentData || currentData.length === 0) return;
 
+    // Check if enough time has passed since the last point to add a new tick
+    const firstSeries = currentData[0];
+    const firstMeasurement = measurements.find(m => m.type === firstSeries.type);
+    if (!firstMeasurement) return;
+
+    const lastPoint = firstSeries.data[firstSeries.data.length - 1];
     const resolutionMs = this.currentResolutionMs();
-    const cutoff = new Date().getTime() - this.timeSpan();
+    const newTime = Date.parse(firstMeasurement.date);
+
+    if (lastPoint && (newTime - Date.parse(lastPoint.date)) < resolutionMs) {
+      // Return early without updating signal to avoid chart jitter/redraws between ticks
+      return;
+    }
+
+    const cutoff = newTime - this.timeSpan();
 
     this.activeChartData.update(seriesList =>
       seriesList.map(series => {
         const measurement = measurements.find(m => m.type === series.type);
         if (!measurement) return series;
 
-        const data = [...series.data];
-        const last = data[data.length - 1];
-        const newTime = new Date(measurement.date).getTime();
-
-        if (last && (newTime - new Date(last.date).getTime()) < resolutionMs) {
-          // Update last point in same resolution bucket
-          data[data.length - 1] = { date: measurement.date, value: measurement.value };
-        } else {
-          // Push to new bucket
-          data.push({ date: measurement.date, value: measurement.value });
-        }
-
-        // Keep sliding window active by filtering older points
         return {
           ...series,
-          data: data.filter(d => new Date(d.date).getTime() >= cutoff)
+          data: [...series.data, { date: measurement.date, value: measurement.value }]
+            .filter(d => Date.parse(d.date) >= cutoff)
         };
       })
     );
@@ -122,15 +119,35 @@ function generateSeries(
 ): MeasurementSeries {
   const meta = MOCK_METADATA[type];
   const data: DataPoint[] = [];
-  let currentValue = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
+  let currentValue = +((meta.min + meta.max) / 2).toFixed(2);
   const startTime = startDate.getTime();
 
   for (let i = 0; i <= dataPoints; i++) {
     const date = new Date(startTime + i * intervalMs).toISOString();
-    const step = (Math.random() - 0.5) * meta.stepSize;
-    currentValue = Math.max(meta.min, Math.min(meta.max, currentValue + step));
-    data.push({ date, value: +currentValue.toFixed(2) });
+    currentValue = getNextSimulationValue(currentValue, meta);
+    data.push({ date, value: currentValue });
   }
 
   return { type, data };
+}
+
+/**
+ * Calculates the next step in a random walk simulation for a telemetry metric.
+ * Includes a margin of 15% outside the normal boundaries to simulate outliers.
+ * Applies a conditional "gravity" pull force once the value drifts outside the safe range.
+ */
+function getNextSimulationValue(currentVal: number, meta: MeasurementMetadata): number {
+  const range = meta.max - meta.min;
+  const margin = range * 0.15;
+
+  let pull = 0;
+  if (currentVal > meta.max) {
+    pull = (meta.max - currentVal) * 0.15; // Pull down towards the safe range
+  } else if (currentVal < meta.min) {
+    pull = (meta.min - currentVal) * 0.15; // Pull up towards the safe range
+  }
+
+  const step = (Math.random() - 0.5) * meta.stepSize + pull;
+  const nextVal = Math.max(meta.min - margin, Math.min(meta.max + margin, currentVal + step));
+  return +nextVal.toFixed(2);
 }
