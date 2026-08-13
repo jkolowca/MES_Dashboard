@@ -1,4 +1,4 @@
-import { Service, resource, signal, linkedSignal, computed } from '@angular/core';
+import { Service, resource, signal, linkedSignal, computed, effect } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -22,10 +22,10 @@ export class MeasurementService {
   /** Selected chart time span (default: 10 minutes). */
   public readonly timeSpan = signal<number>(10 * 60 * 1000);
 
-  /** Maps the selected timeSpan to a clean data point resolution. */
+  /** Maps the selected timeSpan to a resolution rounded to the nearest whole second. */
   public readonly currentResolutionMs = computed(() => {
     const span = this.timeSpan();
-    return span / 120;
+    return Math.round(span / 120 / 1000) * 1000;
   });
 
   /** Historical data loaded from simulated API based on selected timeSpan. */
@@ -48,7 +48,7 @@ export class MeasurementService {
   /** Active historical chart data that resets on historicalData changes. */
   public readonly activeChartData = linkedSignal<MeasurementSeries[] | undefined, MeasurementSeries[]>({
     source: () => this.historicalData.value(),
-    computation: (data) => data ? JSON.parse(JSON.stringify(data)) : []
+    computation: (data) => data ? structuredClone(data) : []
   });
 
   /** Current state of live values for random walk simulation. */
@@ -58,48 +58,60 @@ export class MeasurementService {
     return acc;
   }, {} as Record<string, number>);
 
+  constructor() {
+    // Seed live values from the end of each historical series so the simulation
+    // continues seamlessly without a visible jump at the history/live seam.
+    effect(() => {
+      const data = this.historicalData.value();
+      if (!data) return;
+      data.forEach(series => {
+        const lastPoint = series.data[series.data.length - 1];
+        if (lastPoint) this.currentLiveValues[series.type] = lastPoint.value;
+      });
+    });
+  }
+
   /** Reactive real-time stream of live measurements running every 1 second. */
   public readonly latestLiveMeasurements = toSignal(
     interval(1000).pipe(
-      map(() => {
-        const date = new Date().toISOString();
-        return Object.keys(this.currentLiveValues).map(type => {
+      map(tick => ({
+        tick,
+        measurements: Object.keys(this.currentLiveValues).map(type => {
           const meta = MOCK_METADATA[type];
           this.currentLiveValues[type] = getNextSimulationValue(this.currentLiveValues[type], meta);
-          return { type, value: this.currentLiveValues[type], date };
-        });
+          return { type, value: this.currentLiveValues[type], date: new Date().toISOString() };
+        })
+      })),
+      // Only update chart data on resolution-aligned ticks; toSignal still receives every second
+      tap(({ tick, measurements }) => {
+        const resolutionSeconds = this.currentResolutionMs() / 1000;
+        if (tick % resolutionSeconds === 0) {
+          this.updateActiveChartData(measurements);
+        }
       }),
-      tap(measurements => this.updateActiveChartData(measurements))
+      map(({ measurements }) => measurements)
     ),
     { initialValue: [] as LiveMeasurement[] }
   );
 
-  /** Updates the active chart data series with the latest live measurements only on tick boundaries. */
+  /**
+   * Appends a live measurement tick to the active chart data and trims the sliding time window.
+   * Only called on resolution-aligned ticks — the filtering is handled upstream in the RxJS pipe.
+   */
   private updateActiveChartData(measurements: LiveMeasurement[]): void {
     const currentData = this.activeChartData();
     if (!currentData || currentData.length === 0) return;
 
-    // Check if enough time has passed since the last point to add a new tick
-    const firstSeries = currentData[0];
-    const firstMeasurement = measurements.find(m => m.type === firstSeries.type);
+    const firstMeasurement = measurements.find(m => m.type === currentData[0].type);
     if (!firstMeasurement) return;
 
-    const lastPoint = firstSeries.data[firstSeries.data.length - 1];
-    const resolutionMs = this.currentResolutionMs();
     const newTime = Date.parse(firstMeasurement.date);
-
-    if (lastPoint && (newTime - Date.parse(lastPoint.date)) < resolutionMs) {
-      // Return early without updating signal to avoid chart jitter/redraws between ticks
-      return;
-    }
-
     const cutoff = newTime - this.timeSpan();
 
     this.activeChartData.update(seriesList =>
       seriesList.map(series => {
         const measurement = measurements.find(m => m.type === series.type);
         if (!measurement) return series;
-
         return {
           ...series,
           data: [...series.data, { date: measurement.date, value: measurement.value }]

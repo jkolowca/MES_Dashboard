@@ -1,5 +1,5 @@
 import { Component, computed, inject, input, linkedSignal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MeasurementService } from '../../../../core/services/measurement.service';
@@ -7,7 +7,7 @@ import { LiveMeasurement } from '../../../../core/models/measurement.model';
 
 @Component({
   selector: 'app-sensor-widget',
-  imports: [CommonModule, CardModule, ProgressBarModule],
+  imports: [DatePipe, CardModule, ProgressBarModule],
   templateUrl: './sensor-widget.component.html',
   styleUrl: './sensor-widget.component.scss'
 })

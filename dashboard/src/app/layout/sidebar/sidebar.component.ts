@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { UiStateService } from '../../core/services/ui-state.service';
 import { NavigationService } from '../../core/services/navigation.service';
@@ -13,8 +12,7 @@ import { UserProfileWidgetComponent } from './user-profile-widget/user-profile-w
  */
 @Component({
   selector: 'app-sidebar',
-  standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, ButtonModule, PIcon, SidebarModule, UserProfileWidgetComponent],
+  imports: [RouterLink, RouterLinkActive, ButtonModule, PIcon, SidebarModule, UserProfileWidgetComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })

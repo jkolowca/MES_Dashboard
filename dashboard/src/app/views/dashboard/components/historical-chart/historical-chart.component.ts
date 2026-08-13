@@ -1,6 +1,5 @@
 import { Component, computed, inject, linkedSignal } from '@angular/core';
 import { getChartDatasetOptions, getChartOptions, TIME_SPAN_OPTIONS, AxisScaleConfig } from './historical-chart.config';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChartModule } from 'primeng/chart';
 import { ToggleButtonModule } from 'primeng/togglebutton';
@@ -11,7 +10,7 @@ import { UiStateService } from '../../../../core/services/ui-state.service';
 
 @Component({
   selector: 'app-historical-chart',
-  imports: [CommonModule, FormsModule, ChartModule, ToggleButtonModule, SelectButtonModule, CardModule],
+  imports: [FormsModule, ChartModule, ToggleButtonModule, SelectButtonModule, CardModule],
   templateUrl: './historical-chart.component.html',
   styleUrl: './historical-chart.component.scss'
 })
@@ -105,7 +104,7 @@ export class HistoricalChartComponent {
             if (!activeAxes.includes(axis)) {
               activeAxes.push(axis);
             }
-            
+
             if (!axesConfig[axis]) {
               axesConfig[axis] = {
                 label: `${metricMeta.name} (${metricMeta.unit})`,
