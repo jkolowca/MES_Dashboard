@@ -1,7 +1,7 @@
 @let isMobile=uiStateService.isMobile();
 @if(isMobile) {<p-sidebar-backdrop />}
 <p-sidebar variant="sidebar" [overlay]="isMobile" [collapsible]="isMobile? 'offcanvas': 'icon'" id="main-menu"
-  [open]="uiStateService.isMenuOpen()" (openChange)="uiStateService.setMenuOpen($event)">
+  [open]="false">
   <p-sidebar-spacer />
   <p-sidebar-aside>
     <p-sidebar-panel>
