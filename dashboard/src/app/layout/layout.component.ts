@@ -3,13 +3,14 @@ import { RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
+import { SidebarModule } from 'primeng/sidebar';
 
 /**
  * Main application shell layout.
  */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, SidebarComponent, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, SidebarModule, SidebarComponent, HeaderComponent, FooterComponent],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })
