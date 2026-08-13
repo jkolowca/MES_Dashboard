@@ -74,13 +74,20 @@ export class MeasurementService {
   /** Reactive real-time stream of live measurements running every 1 second. */
   public readonly latestLiveMeasurements = toSignal(
     interval(1000).pipe(
+      // Advance the random walk state — side effect belongs in tap, not map
+      tap(() => {
+        Object.keys(this.currentLiveValues).forEach(type => {
+          this.currentLiveValues[type] = getNextSimulationValue(this.currentLiveValues[type], MOCK_METADATA[type]);
+        });
+      }),
+      // Pure snapshot of the current values after advancing
       map(tick => ({
         tick,
-        measurements: Object.keys(this.currentLiveValues).map(type => {
-          const meta = MOCK_METADATA[type];
-          this.currentLiveValues[type] = getNextSimulationValue(this.currentLiveValues[type], meta);
-          return { type, value: this.currentLiveValues[type], date: new Date().toISOString() };
-        })
+        measurements: Object.keys(this.currentLiveValues).map(type => ({
+          type,
+          value: this.currentLiveValues[type],
+          date: new Date().toISOString()
+        }))
       })),
       // Only update chart data on resolution-aligned ticks; toSignal still receives every second
       tap(({ tick, measurements }) => {

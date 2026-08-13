@@ -8,14 +8,14 @@
       <i class="pi pi-arrow-up trend-icon trend-up"></i>
       } @else if (trend() === 'down') {
       <i class="pi pi-arrow-down trend-icon trend-down"></i>
-      } @else if (trend() === 'none') {
+      } @else {
       <i class="pi pi-minus trend-icon trend-none"></i>
       }
     </div>
     <div class="sensor-progress">
       <div class="sensor-progress-labels">
-        <span>{{ metadata()?.min || 0 }}</span>
-        <span>{{ metadata()?.max || 0 }}</span>
+        <span>{{ metadata()?.min ?? 0 }}</span>
+        <span>{{ metadata()?.max ?? 0 }}</span>
       </div>
       <p-progressbar [value]="percentage()" [showValue]="false" styleClass="sensor-bar">
       </p-progressbar>

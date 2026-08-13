@@ -74,7 +74,7 @@ export class HistoricalChartComponent {
 
     const datasets = filteredData.map(series => {
       const metadata = this.measurementService.metadata.value()?.[series.type];
-      const labelName = this.metricOptions().find(o => o.value === series.type)?.label || series.type;
+      const labelName = metadata?.name ?? series.type;
 
       return getChartDatasetOptions(
         labelName,
@@ -89,7 +89,7 @@ export class HistoricalChartComponent {
   });
 
   // Chart configuration with dynamic scales
-  public chartOptions = computed(() => {
+  public readonly chartOptions = computed(() => {
     const meta = this.measurementService.metadata.value();
     const selected = this.selectedMetrics();
     const activeAxes: string[] = [];
@@ -98,25 +98,18 @@ export class HistoricalChartComponent {
     if (meta) {
       for (const key of selected) {
         const metricMeta = meta[key];
-        if (metricMeta) {
-          const axis = metricMeta.axis;
-          if (axis) {
-            if (!activeAxes.includes(axis)) {
-              activeAxes.push(axis);
-            }
-
-            if (!axesConfig[axis]) {
-              axesConfig[axis] = {
-                label: `${metricMeta.name} (${metricMeta.unit})`,
-                color: metricMeta.color
-              };
-            }
+        if (metricMeta?.axis) {
+          const { axis } = metricMeta;
+          if (!activeAxes.includes(axis)) activeAxes.push(axis);
+          if (!axesConfig[axis]) {
+            axesConfig[axis] = {
+              label: `${metricMeta.name} (${metricMeta.unit})`,
+              color: metricMeta.color
+            };
           }
         }
       }
-    }
 
-    if (meta) {
       for (const axis of activeAxes) {
         const metricsForAxis = selected.filter(key => meta[key]?.axis === axis);
         if (metricsForAxis.length > 0) {

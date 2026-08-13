@@ -59,8 +59,8 @@ export class AlarmService {
           if (!currentAlarms.some(a => a.metricType === m.type)) {
             const time = new Date().toLocaleTimeString();
             const message = m.value > meta.max
-              ? $localize`${m.type} is too high (${m.value}:value:). Max allowed is ${meta.max}:max:.`
-              : $localize`${m.type} is too low (${m.value}:value:). Min allowed is ${meta.min}:min:.`;
+              ? $localize`${meta.name} is too high (${m.value}:value:). Max allowed is ${meta.max}:max:.`
+              : $localize`${meta.name} is too low (${m.value}:value:). Min allowed is ${meta.min}:min:.`;
 
             currentAlarms.unshift({
               statusType: 'danger',

@@ -12,7 +12,6 @@ import { SidebarModule } from 'primeng/sidebar';
  */
 @Component({
   selector: 'app-user-profile-widget',
-  standalone: true,
   imports: [ButtonModule, AvatarModule, PIcon, SidebarModule],
   templateUrl: './user-profile-widget.component.html',
   styleUrl: './user-profile-widget.component.scss'
@@ -22,17 +21,11 @@ export class UserProfileWidgetComponent {
   public readonly userService = inject(UserService);
   private readonly document = inject(DOCUMENT);
 
-  /** Checks if the Polish bundle is currently active. */
-  public isPolish(): boolean {
-    return this.document.location.pathname.startsWith('/pl');
-  }
+  /** True when the Polish locale bundle is active. Evaluated once — locale never changes mid-session. */
+  public readonly isPolish = this.document.location.pathname.startsWith('/pl');
 
   /** Switches the language via hard reload. */
   public switchLanguage(): void {
-    if (this.isPolish()) {
-      this.document.location.href = '/en/';
-    } else {
-      this.document.location.href = '/pl/';
-    }
+    this.document.location.href = this.isPolish ? '/en/' : '/pl/';
   }
 }
