@@ -2,7 +2,11 @@
   <p-sidebar-menu-item>
     <button pSidebarMenuButton (click)="uiStateService.toggleTheme()">
       <svg [pIcon]="uiStateService.isDarkMode() ? 'sun' : 'moon'"></svg>
-      <span>{{ uiStateService.isDarkMode() ? 'Light' : 'Dark' }}</span>
+      @if (uiStateService.isDarkMode()) {
+        <span i18n>Light</span>
+      } @else {
+        <span i18n>Dark</span>
+      }
     </button>
   </p-sidebar-menu-item>
   <p-sidebar-menu-item>

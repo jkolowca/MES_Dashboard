@@ -41,7 +41,7 @@ export interface MeasurementMetadata {
  */
 export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
   inletTemperature: {
-    name: 'Inlet Temperature',
+    name: $localize`Inlet Temperature`,
     unit: '°C',
     min: 38,
     max: 47,
@@ -50,7 +50,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 0.5
   },
   outletTemperature: {
-    name: 'Outlet Temperature',
+    name: $localize`Outlet Temperature`,
     unit: '°C',
     min: 58,
     max: 67,
@@ -59,7 +59,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 0.5
   },
   coolantPressure: {
-    name: 'Coolant Pressure',
+    name: $localize`Coolant Pressure`,
     unit: 'bar',
     min: 1.5,
     max: 2.8,
@@ -68,7 +68,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 0.05
   },
   flowRate: {
-    name: 'Flow Rate',
+    name: $localize`Flow Rate`,
     unit: 'L/min',
     min: 90,
     max: 120,

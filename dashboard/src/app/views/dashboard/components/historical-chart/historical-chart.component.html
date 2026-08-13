@@ -1,5 +1,12 @@
-<p-card i18n-header header="Historical Telemetry Data">
-  <div class="chart-header">
+<p-card>
+  <ng-template #title>
+    <span class="p-card-title" i18n>Historical Telemetry Data</span>
+    <p-selectbutton [options]="timeSpanOptions" [ngModel]="measurementService.timeSpan()"
+      (ngModelChange)="$event ? measurementService.timeSpan.set($event) : null" optionLabel="label" optionValue="value"
+      [allowEmpty]="false" styleClass="time-selector">
+    </p-selectbutton>
+  </ng-template>
+  <ng-template #content>
     <div class="chart-controls">
       <div class="metric-selector">
         @for (item of metricOptions(); track item.value) {
@@ -14,21 +21,16 @@
         </p-togglebutton>
         }
       </div>
-
-      <p-selectbutton [options]="timeSpanOptions" [ngModel]="measurementService.timeSpan()"
-        (ngModelChange)="$event ? measurementService.timeSpan.set($event) : null" optionLabel="label"
-        optionValue="value" [allowEmpty]="false" styleClass="time-selector">
-      </p-selectbutton>
     </div>
-  </div>
 
-  <div class="chart-wrapper">
-    @if (measurementService.historicalData.isLoading()) {
-    <div class="loading-overlay">
-      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
-      <span i18n>Loading historical data...</span>
+    <div class="chart-wrapper">
+      @if (measurementService.historicalData.isLoading()) {
+      <div class="loading-overlay">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+        <span i18n>Loading historical data...</span>
+      </div>
+      }
+      <p-chart type="line" [data]="chartData()" [options]="chartOptions()"></p-chart>
     </div>
-    }
-    <p-chart type="line" [data]="chartData()" [options]="chartOptions()"></p-chart>
-  </div>
+  </ng-template>
 </p-card>

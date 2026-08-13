@@ -24,9 +24,14 @@ export default defineConfig({
         prefixer({
           prefix: 'vue-alarms-widget',
           transform(prefix, selector, prefixedSelector, filePath) {
-            // Scope dark theme to .app-dark, and light theme to everything else
-            const isDark = filePath?.includes('dark');
-            const scope = isDark ? '.app-dark vue-alarms-widget' : 'html:not(.app-dark) vue-alarms-widget';
+            // Only restrict theme stylesheets to their respective light/dark selectors
+            const isTheme = filePath?.includes('themes/');
+            let scope = 'vue-alarms-widget';
+            
+            if (isTheme) {
+              const isDark = filePath?.includes('dark');
+              scope = isDark ? '.app-dark vue-alarms-widget' : 'html:not(.app-dark) vue-alarms-widget';
+            }
             
             if (selector === 'body' || selector === 'html') return scope;
             if (selector.startsWith(':root')) return selector.replace(':root', scope);

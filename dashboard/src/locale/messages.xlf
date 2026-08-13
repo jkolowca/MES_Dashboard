@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-  <file source-language="en-US" target-language="pl" datatype="plaintext" original="ng2.template">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
     <body>
       <trans-unit id="2100647347380300759" datatype="html">
         <source>Inlet Temperature</source>
-        <target>Temperatura wlotowa</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/models/measurement.model.ts</context>
           <context context-type="linenumber">44</context>
@@ -12,7 +11,6 @@
       </trans-unit>
       <trans-unit id="8196814509096896410" datatype="html">
         <source>Outlet Temperature</source>
-        <target>Temperatura wylotowa</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/models/measurement.model.ts</context>
           <context context-type="linenumber">53</context>
@@ -20,7 +18,6 @@
       </trans-unit>
       <trans-unit id="2496855339196450145" datatype="html">
         <source>Coolant Pressure</source>
-        <target>Ciśnienie chłodziwa</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/models/measurement.model.ts</context>
           <context context-type="linenumber">62</context>
@@ -28,7 +25,6 @@
       </trans-unit>
       <trans-unit id="3102940210163598253" datatype="html">
         <source>Flow Rate</source>
-        <target>Natężenie przepływu</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/models/measurement.model.ts</context>
           <context context-type="linenumber">71</context>
@@ -36,7 +32,6 @@
       </trans-unit>
       <trans-unit id="2437478124199610198" datatype="html">
         <source>Critical</source>
-        <target>Krytyczny</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">19</context>
@@ -48,7 +43,6 @@
       </trans-unit>
       <trans-unit id="1606940965864160652" datatype="html">
         <source>Pressure exceeds safety limits in sector 7G</source>
-        <target>Ciśnienie przekracza granice bezpieczeństwa w sektorze 7G</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">20</context>
@@ -56,7 +50,6 @@
       </trans-unit>
       <trans-unit id="6759205696902713848" datatype="html">
         <source>Warning</source>
-        <target>Ostrzeżenie</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">25</context>
@@ -64,7 +57,6 @@
       </trans-unit>
       <trans-unit id="3832411770268755594" datatype="html">
         <source>Coolant flow rate below optimal threshold</source>
-        <target>Przepływ chłodziwa poniżej optymalnego progu</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">26</context>
@@ -72,7 +64,6 @@
       </trans-unit>
       <trans-unit id="314315645942131479" datatype="html">
         <source>Info</source>
-        <target>Informacja</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">31</context>
@@ -80,7 +71,6 @@
       </trans-unit>
       <trans-unit id="4247034736631452365" datatype="html">
         <source>Routine maintenance scheduled for pump 3</source>
-        <target>Planowana rutynowa konserwacja pompy 3</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">32</context>
@@ -88,7 +78,6 @@
       </trans-unit>
       <trans-unit id="4824839630288784452" datatype="html">
         <source><x id="PH" equiv-text="metricType"/> is too high (<x id="value" equiv-text="value"/>). Max allowed is <x id="max" equiv-text="max"/>.</source>
-        <target>Parametr <x id="PH" equiv-text="metricType"/> ma zbyt wysoką wartość (<x id="value" equiv-text="value"/>). Maksymalna dozwolona to <x id="max" equiv-text="max"/>.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">67</context>
@@ -96,7 +85,6 @@
       </trans-unit>
       <trans-unit id="8836861505980258680" datatype="html">
         <source><x id="PH" equiv-text="metricType"/> is too low (<x id="value" equiv-text="value"/>). Min allowed is <x id="min" equiv-text="min"/>.</source>
-        <target>Parametr <x id="PH" equiv-text="metricType"/> ma zbyt niską wartość (<x id="value" equiv-text="value"/>). Minimalna dozwolona to <x id="min" equiv-text="min"/>.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/alarm.service.ts</context>
           <context context-type="linenumber">69</context>
@@ -104,7 +92,6 @@
       </trans-unit>
       <trans-unit id="6570363013146073520" datatype="html">
         <source>Dashboard</source>
-        <target>Kokpit</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
           <context context-type="linenumber">20</context>
@@ -112,7 +99,6 @@
       </trans-unit>
       <trans-unit id="5778514899777017666" datatype="html">
         <source>Sensors</source>
-        <target>Czujniki</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
           <context context-type="linenumber">21</context>
@@ -120,7 +106,6 @@
       </trans-unit>
       <trans-unit id="7861389751355579174" datatype="html">
         <source>Analytics</source>
-        <target>Analityka</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
           <context context-type="linenumber">22</context>
@@ -128,7 +113,6 @@
       </trans-unit>
       <trans-unit id="3465942650835858981" datatype="html">
         <source>Maintenance</source>
-        <target>Utrzymanie ruchu</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/services/navigation.service.ts</context>
           <context context-type="linenumber">23</context>
@@ -136,7 +120,6 @@
       </trans-unit>
       <trans-unit id="2527485330251612044" datatype="html">
         <source> App version: <x id="INTERPOLATION" equiv-text="{{ version }}"/> </source>
-        <target> Wersja aplikacji: <x id="INTERPOLATION" equiv-text="{{ version }}"/> </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/footer/footer.component.html</context>
           <context context-type="linenumber">7,9</context>
@@ -144,7 +127,6 @@
       </trans-unit>
       <trans-unit id="3647616048271413511" datatype="html">
         <source>Toggle menu</source>
-        <target>Przełącz menu</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/header/header.component.html</context>
           <context context-type="linenumber">4</context>
@@ -156,7 +138,6 @@
       </trans-unit>
       <trans-unit id="3075199488885025410" datatype="html">
         <source>A-MES</source>
-        <target>A-MES</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/header/header.component.html</context>
           <context context-type="linenumber">9,10</context>
@@ -164,7 +145,6 @@
       </trans-unit>
       <trans-unit id="1348774649041038169" datatype="html">
         <source>Navigation</source>
-        <target>Nawigacja</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/sidebar/sidebar.component.html</context>
           <context context-type="linenumber">20,21</context>
@@ -172,7 +152,6 @@
       </trans-unit>
       <trans-unit id="413116577994876478" datatype="html">
         <source>Light</source>
-        <target>Jasny</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/sidebar/user-profile-widget/user-profile-widget.component.html</context>
           <context context-type="linenumber">6,7</context>
@@ -180,7 +159,6 @@
       </trans-unit>
       <trans-unit id="3892161059518616136" datatype="html">
         <source>Dark</source>
-        <target>Ciemny</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/layout/sidebar/user-profile-widget/user-profile-widget.component.html</context>
           <context context-type="linenumber">8,9</context>
@@ -188,23 +166,20 @@
       </trans-unit>
       <trans-unit id="4855443046316563190" datatype="html">
         <source>Historical Telemetry Data</source>
-        <target>Historyczne dane telemetryczne</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/dashboard/components/historical-chart/historical-chart.component.html</context>
-          <context context-type="linenumber">1,2</context>
+          <context context-type="linenumber">3,4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="788812761457180666" datatype="html">
         <source>Loading historical data...</source>
-        <target>Ładowanie danych historycznych...</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/dashboard/components/historical-chart/historical-chart.component.html</context>
-          <context context-type="linenumber">29,30</context>
+          <context context-type="linenumber">30,31</context>
         </context-group>
       </trans-unit>
       <trans-unit id="8550784071842813779" datatype="html">
         <source>System Alarms</source>
-        <target>Alarmy systemowe</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/dashboard/dashboard.component.html</context>
           <context context-type="linenumber">13,14</context>
@@ -212,7 +187,6 @@
       </trans-unit>
       <trans-unit id="3199102052710873617" datatype="html">
         <source>Acknowledge All</source>
-        <target>Potwierdź wszystkie</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/dashboard/dashboard.component.html</context>
           <context context-type="linenumber">14,15</context>
@@ -220,7 +194,6 @@
       </trans-unit>
       <trans-unit id="2925754569645625375" datatype="html">
         <source>System operating normally. No active alarms.</source>
-        <target>System działa normalnie. Brak aktywnych alarmów.</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/dashboard/dashboard.component.html</context>
           <context context-type="linenumber">15,16</context>
@@ -228,7 +201,6 @@
       </trans-unit>
       <trans-unit id="6578397717654172779" datatype="html">
         <source>Page Not Found</source>
-        <target>Nie znaleziono strony</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/not-found/not-found.component.html</context>
           <context context-type="linenumber">3,4</context>
@@ -236,7 +208,6 @@
       </trans-unit>
       <trans-unit id="6132725696287873914" datatype="html">
         <source> The page you are looking for doesn&apos;t exist or has been moved. </source>
-        <target> Strona, której szukasz, nie istnieje lub została przeniesiona. </target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/not-found/not-found.component.html</context>
           <context context-type="linenumber">5,7</context>
@@ -244,7 +215,6 @@
       </trans-unit>
       <trans-unit id="81929436613898336" datatype="html">
         <source>Back to Dashboard</source>
-        <target>Wróć do Kokpitu</target>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/views/not-found/not-found.component.html</context>
           <context context-type="linenumber">7</context>

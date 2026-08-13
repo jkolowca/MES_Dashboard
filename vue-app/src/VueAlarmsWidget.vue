@@ -1,30 +1,27 @@
 <template>
   <Card>
-    <template #title>System Alarms
-       <Button v-if="alarms.length > 0" @click="acknowledgeAll">
-          <i class="pi pi-check"></i>
-          Acknowledge All
-        </Button>
+    <template #title>
+      <div class="header">
+        {{ title }}
+        <Button v-if="alarms.length > 0" @click="acknowledgeAll" :label="ackLabel" icon="pi pi-check" class="p-button-text" />
+      </div>
     </template>
     <template #content>
-      
-
       <div v-if="alarms.length === 0" class="no-alarms p-text-secondary">
         <i class="pi pi-check-circle p-mr-2" style="color: #22c55e;"></i>
-        <span>System operating normally. No active alarms.</span>
+        <span>{{ emptyMessage }}</span>
       </div>
   
       <div v-else class="alarm-list">
         <div v-for="(alarm, idx) in alarms" :key="idx" class="alarm-item">
           <div class="alarm-time p-text-secondary">{{ alarm.time }}</div>
           <div class="alarm-content">
-            <Tag :value="alarm.status" :severity="getSeverity(alarm.status)" class="p-mb-2" />
-            <p>{{ alarm.message }}</p>
+            <Tag :value="alarm.statusLabel" :severity="alarm.statusType" class="p-mb-2" />
+            <p>{{ alarm.alarmMessage }}</p>
           </div>
         </div>
       </div>
     </template>
-    
   </Card>
 </template>
 
@@ -35,8 +32,9 @@ import Tag from 'primevue/tag';
 import Card from 'primevue/card';
 
 export interface Alarm {
-  status: 'Critical' | 'Warning' | 'Info',
-  message: string,
+  statusType: 'danger' | 'warning' | 'info',
+  statusLabel: string,
+  alarmMessage: string,
   time: string
 }
 
@@ -49,16 +47,23 @@ export default {
   },
   props: {
     alarms: {
-      type: [Array, String] as PropType<Alarm[] | string>,
+      type: Array as PropType<Alarm[]>,
       default: () => []
     },
+    title: {
+      type: String,
+      default: 'System Alarms'
+    },
+    ackLabel: {
+      type: String,
+      default: 'Acknowledge All'
+    },
+    emptyMessage: {
+      type: String,
+      default: 'System operating normally. No active alarms.'
+    }
   },
   methods: {
-    getSeverity(status: string) {
-      if (status === 'Critical') return 'danger';
-      if (status === 'Warning') return 'warning';
-      return 'info';
-    },
     acknowledgeAll() {
       this.$emit('acknowledge-all');
     }
@@ -67,16 +72,12 @@ export default {
 </script>
 
 <style scoped>
-.header-row {
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-}
-
-h3 {
-  margin: 0;
-  font-weight: 600;
+  gap: .5rem;
+  flex-wrap: wrap;
 }
 
 .no-alarms {

@@ -7,7 +7,12 @@
 
   <app-historical-chart></app-historical-chart>
   @defer {
-  <vue-alarms-widget [alarms]="alarmService.alarms()"
-    (acknowledge-all)="alarmService.acknowledgeAll()"></vue-alarms-widget>
+  <vue-alarms-widget 
+    [alarms]="alarmService.alarms()"
+    (acknowledge-all)="alarmService.acknowledgeAll()"
+    i18n-title title="System Alarms"
+    i18n-ack-label ack-label="Acknowledge All"
+    i18n-empty-message empty-message="System operating normally. No active alarms."
+  ></vue-alarms-widget>
   }
 </div>

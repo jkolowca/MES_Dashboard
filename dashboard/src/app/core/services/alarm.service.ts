@@ -2,8 +2,9 @@ import { Service, signal, effect, inject } from '@angular/core';
 import { MeasurementService } from './measurement.service';
 
 export interface SystemAlarm {
-  status: 'Critical' | 'Warning' | 'Info';
-  message: string;
+  statusType: 'danger' | 'warning' | 'info';
+  statusLabel: string;
+  alarmMessage: string;
   time: string;
   metricType?: string;
 }
@@ -13,9 +14,24 @@ export class AlarmService {
   private readonly measurementService = inject(MeasurementService);
 
   public alarms = signal<SystemAlarm[]>([
-    { status: 'Critical', message: 'Pressure exceeds safety limits in sector 7G', time: '10:45:02' },
-    { status: 'Warning', message: 'Coolant flow rate below optimal threshold', time: '10:42:15' },
-    { status: 'Info', message: 'Routine maintenance scheduled for pump 3', time: '09:00:00' }
+    {
+      statusType: 'danger',
+      statusLabel: $localize`Critical`,
+      alarmMessage: $localize`Pressure exceeds safety limits in sector 7G`,
+      time: '10:45:02'
+    },
+    {
+      statusType: 'warning',
+      statusLabel: $localize`Warning`,
+      alarmMessage: $localize`Coolant flow rate below optimal threshold`,
+      time: '10:42:15'
+    },
+    {
+      statusType: 'info',
+      statusLabel: $localize`Info`,
+      alarmMessage: $localize`Routine maintenance scheduled for pump 3`,
+      time: '09:00:00'
+    }
   ]);
 
   constructor() {
@@ -46,15 +62,21 @@ export class AlarmService {
 
     const time = new Date().toLocaleTimeString();
     let message = '';
-    
+
     if (value > max) {
-      message = `${metricType} is too high (${value}). Max allowed is ${max}.`;
+      message = $localize`${metricType} is too high (${value}:value:). Max allowed is ${max}:max:.`;
     } else {
-      message = `${metricType} is too low (${value}). Min allowed is ${min}.`;
+      message = $localize`${metricType} is too low (${value}:value:). Min allowed is ${min}:min:.`;
     }
 
     this.alarms.update(alarms => [
-      { status: 'Critical', message, time, metricType },
+      {
+        statusType: 'danger',
+        statusLabel: $localize`Critical`,
+        alarmMessage: message,
+        time,
+        metricType
+      },
       ...alarms
     ]);
   }
