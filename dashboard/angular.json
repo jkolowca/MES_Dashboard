@@ -14,7 +14,10 @@
       "sourceRoot": "src",
       "prefix": "app",
       "i18n": {
-        "sourceLocale": "en-US",
+        "sourceLocale": {
+          "code": "en-US",
+          "baseHref": "/en/"
+        },
         "locales": {
           "pl": {
             "translation": "src/locale/messages.pl.xlf",
@@ -51,6 +54,7 @@
           },
           "configurations": {
             "production": {
+              "localize": true,
               "budgets": [
                 {
                   "type": "initial",
