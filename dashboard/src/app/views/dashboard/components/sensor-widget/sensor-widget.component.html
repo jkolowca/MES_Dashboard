@@ -2,7 +2,7 @@
   <div [class]="statusClass()">
     <div class="sensor-content">
       <span class="sensor-value">{{ measurement().value }}</span>
-      <span class="sensor-unit">{{ unit() }}</span>
+      <span class="sensor-unit">{{ metadata()?.unit || '' }}</span>
 
       @if (trend() === 'up') {
       <i class="pi pi-arrow-up trend-icon trend-up"></i>
@@ -14,8 +14,8 @@
     </div>
     <div class="sensor-progress">
       <div class="sensor-progress-labels">
-        <span>{{ min() }}</span>
-        <span>{{ max() }}</span>
+        <span>{{ metadata()?.min || 0 }}</span>
+        <span>{{ metadata()?.max || 0 }}</span>
       </div>
       <p-progressbar [value]="percentage()" [showValue]="false" styleClass="sensor-bar">
       </p-progressbar>

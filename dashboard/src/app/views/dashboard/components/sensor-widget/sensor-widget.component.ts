@@ -1,9 +1,9 @@
-import { Component, computed, inject, input, effect, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { MeasurementService } from '../../../../core/services/measurement.service';
-import { LiveMeasurement, translateMetadataKey } from '../../../../core/models/measurement.model';
+import { LiveMeasurement } from '../../../../core/models/measurement.model';
 
 @Component({
   selector: 'app-sensor-widget',
@@ -15,36 +15,27 @@ export class SensorWidgetComponent {
   private readonly measurementService = inject(MeasurementService);
 
   public readonly measurement = input.required<LiveMeasurement>();
-  public readonly trend = signal<'up' | 'down' | 'none'>('none');
 
-  private previousValue = 0;
-  private isFirst = true;
+  /**
+   * Tracks the trend of sensor values reactively using a linkedSignal.
+   * Compares the current value against the previous cached source value.
+   */
+  public readonly trend = linkedSignal<number, 'up' | 'down' | 'none'>({
+    source: () => this.measurement().value,
+    computation: (current, previous) => {
+      if (!previous) return 'none';
+      if (current > previous.source) return 'up';
+      if (current < previous.source) return 'down';
+      return 'none';
+    }
+  });
 
-  constructor() {
-    effect(() => {
-      const current = this.measurement().value;
-      if (!this.isFirst) {
-        if (current > this.previousValue) {
-          this.trend.set('up');
-        } else if (current < this.previousValue) {
-          this.trend.set('down');
-        } else {
-          this.trend.set('none');
-        }
-      }
-      this.isFirst = false;
-      this.previousValue = current;
-    }, { allowSignalWrites: true });
-  }
-
-  private readonly metadata = computed(() => {
+  /** Exposes the sensor metadata definition. */
+  public readonly metadata = computed(() => {
     return this.measurementService.metadata.value()?.[this.measurement().type];
   });
 
-  public readonly min = computed(() => this.metadata()?.min || 0);
-  public readonly max = computed(() => this.metadata()?.max || 0);
-  public readonly unit = computed(() => this.metadata()?.unit || '');
-
+  /** Calculates current value percentage relative to the min/max range. */
   public readonly percentage = computed(() => {
     const meta = this.metadata();
     if (!meta) return 0;
@@ -55,11 +46,12 @@ export class SensorWidgetComponent {
     return Math.max(0, Math.min(100, Math.round((current / range) * 100)));
   });
 
+  /** Display name of the metric. */
   public readonly localizedName = computed(() => {
-    const meta = this.metadata();
-    return meta ? translateMetadataKey(meta.i18nKey) : this.measurement().type;
+    return this.metadata()?.name || this.measurement().type;
   });
 
+  /** CSS class to color code warning/danger/normal levels based on metadata bounds. */
   public readonly statusClass = computed(() => {
     const meta = this.metadata();
     if (!meta) return 'status-normal';

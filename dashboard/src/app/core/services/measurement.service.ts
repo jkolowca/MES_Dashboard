@@ -1,59 +1,35 @@
-import { Service, resource, signal, WritableSignal, linkedSignal, computed } from '@angular/core';
-import { MeasurementSeries, LiveMeasurement, DataPoint, MeasurementMetadata, MOCK_METADATA } from '../models/measurement.model';
-import { interval, Observable } from 'rxjs';
+import { Service, resource, signal, linkedSignal, computed } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { interval } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { MeasurementSeries, LiveMeasurement, DataPoint, MeasurementMetadata, MOCK_METADATA } from '../models/measurement.model';
 
 /**
- * Service simulating backend REST API and WebSocket streams.
+ * Service responsible for managing telemetry measurements, simulating real-time WebSocket
+ * updates and REST API responses for historical charts.
  */
 @Service()
 export class MeasurementService {
 
-  /**
-   * Signal exposing the latest live measurements array.
-   */
-  public readonly latestLiveMeasurements: WritableSignal<LiveMeasurement[]> = signal([]);
-
-  /**
-   * Simulated REST API returning the configuration metadata for the sensors.
-   */
-  public metadata = resource<Record<string, MeasurementMetadata>, void>({
+  /** Metadata configuration for the sensors. */
+  public readonly metadata = resource<Record<string, MeasurementMetadata>, void>({
     loader: async () => {
       await new Promise(resolve => setTimeout(resolve, 300));
       return MOCK_METADATA;
     }
   });
 
-  /**
-   * Selected time span for historical data in milliseconds.
-   */
-  public timeSpan = signal<number>(8 * 60 * 60 * 1000);
+  /** Selected chart time span (default: 8 hours). */
+  public readonly timeSpan = signal<number>(8 * 60 * 60 * 1000);
 
-  /**
-   * Calculated temporal resolution in milliseconds based on selected time span.
-   */
+  /** Maps the selected timeSpan to a clean data point resolution. */
   public readonly currentResolutionMs = computed(() => {
     const span = this.timeSpan();
-    const rawInterval = span / 90;
-    
-    const NICE_INTERVALS = [
-      60 * 1000,          // 1 minute
-      5 * 60 * 1000,      // 5 minutes
-      15 * 60 * 1000,     // 15 minutes
-      30 * 60 * 1000,     // 30 minutes
-      60 * 60 * 1000,     // 1 hour
-      2 * 60 * 60 * 1000  // 2 hours
-    ];
-
-    return NICE_INTERVALS.reduce((prev, curr) => 
-      Math.abs(curr - rawInterval) < Math.abs(prev - rawInterval) ? curr : prev
-    );
+    return span / 60;
   });
 
-  /**
-   * Simulated REST API returning historical data series.
-   */
-  public historicalData = resource<MeasurementSeries[], number>({
+  /** Historical data loaded from simulated API based on selected timeSpan. */
+  public readonly historicalData = resource<MeasurementSeries[], number>({
     params: () => this.timeSpan(),
     loader: async ({ params: span }) => {
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -61,155 +37,100 @@ export class MeasurementService {
       const now = new Date();
       const start = new Date(now.getTime() - span);
       const intervalMs = this.currentResolutionMs();
+      const dataPoints = Math.max(1, Math.floor(span / intervalMs));
 
-      // Calculate how many data points are between the start and end dates
-      const diffMs = now.getTime() - start.getTime();
-      const dataPoints = Math.max(1, Math.floor(diffMs / intervalMs));
-
-      return Object.keys(MOCK_METADATA).map(type => {
-        const meta = MOCK_METADATA[type];
-        const startValue = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
-        return generateSeries(type, startValue, meta.stepSize, dataPoints, intervalMs, start);
-      });
+      return Object.keys(MOCK_METADATA).map(type =>
+        generateSeries(type, dataPoints, intervalMs, start)
+      );
     }
   });
 
-  /**
-   * Linked signal holding the active historical chart data,
-   * automatically resetting when historicalData resource resolves.
-   */
+  /** Active historical chart data that resets on historicalData changes. */
   public readonly activeChartData = linkedSignal<MeasurementSeries[] | undefined, MeasurementSeries[]>({
     source: () => this.historicalData.value(),
     computation: (data) => data ? JSON.parse(JSON.stringify(data)) : []
   });
 
-  /** Current state for the live random walk */
-  private currentLiveValues: Record<string, number> = Object.keys(MOCK_METADATA).reduce((acc, key) => {
+  /** Current state of live values for random walk simulation. */
+  private readonly currentLiveValues: Record<string, number> = Object.keys(MOCK_METADATA).reduce((acc, key) => {
     const meta = MOCK_METADATA[key];
     acc[key] = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
     return acc;
   }, {} as Record<string, number>);
 
-  /**
-   * Simulated WebSocket stream emitting new data every 1s.
-   */
-  public getLiveUpdates(): Observable<LiveMeasurement[]> {
-    return interval(1000).pipe(
+  /** Reactive real-time stream of live measurements running every 1 second. */
+  public readonly latestLiveMeasurements = toSignal(
+    interval(1000).pipe(
       map(() => {
         const date = new Date().toISOString();
-
         return Object.keys(this.currentLiveValues).map(type => {
-          const stepSize = MOCK_METADATA[type]?.stepSize || 1;
-          this.currentLiveValues[type] = generateNextValue(type, this.currentLiveValues[type], stepSize);
+          const meta = MOCK_METADATA[type];
+          // Simple random walk clamped to safe boundaries
+          const step = (Math.random() - 0.5) * meta.stepSize;
+          const nextVal = Math.max(meta.min, Math.min(meta.max, this.currentLiveValues[type] + step));
+          this.currentLiveValues[type] = +nextVal.toFixed(2);
+
           return { type, value: this.currentLiveValues[type], date };
         });
       }),
-      tap(measurements => {
-        this.latestLiveMeasurements.set(measurements);
-        this.updateActiveChartData(measurements);
+      tap(measurements => this.updateActiveChartData(measurements))
+    ),
+    { initialValue: [] as LiveMeasurement[] }
+  );
+
+  /** Updates the active chart data series with the latest live measurements. */
+  private updateActiveChartData(measurements: LiveMeasurement[]): void {
+    const currentData = this.activeChartData();
+    if (!currentData || currentData.length === 0) return;
+
+    const resolutionMs = this.currentResolutionMs();
+    const cutoff = new Date().getTime() - this.timeSpan();
+
+    this.activeChartData.update(seriesList =>
+      seriesList.map(series => {
+        const measurement = measurements.find(m => m.type === series.type);
+        if (!measurement) return series;
+
+        const data = [...series.data];
+        const last = data[data.length - 1];
+        const newTime = new Date(measurement.date).getTime();
+
+        if (last && (newTime - new Date(last.date).getTime()) < resolutionMs) {
+          // Update last point in same resolution bucket
+          data[data.length - 1] = { date: measurement.date, value: measurement.value };
+        } else {
+          // Push to new bucket
+          data.push({ date: measurement.date, value: measurement.value });
+        }
+
+        // Keep sliding window active by filtering older points
+        return {
+          ...series,
+          data: data.filter(d => new Date(d.date).getTime() >= cutoff)
+        };
       })
     );
   }
-
-  /**
-   * Updates the active chart data series with the latest live measurements,
-   * respecting the temporal resolution and maintaining a sliding window of timeSpan.
-   */
-  private updateActiveChartData(measurements: LiveMeasurement[]): void {
-    const currentData = this.activeChartData();
-    if (!currentData || currentData.length === 0) {
-      return;
-    }
-
-    const resolutionMs = this.currentResolutionMs();
-    const span = this.timeSpan();
-    const nowTime = new Date().getTime();
-    const cutoff = nowTime - span;
-
-    this.activeChartData.update(seriesList => {
-      return seriesList.map(series => {
-        const measurement = measurements.find(m => m.type === series.type);
-        if (!measurement) {
-          return series;
-        }
-
-        const dataPoints = [...series.data];
-        if (dataPoints.length === 0) {
-          dataPoints.push({ date: measurement.date, value: measurement.value });
-        } else {
-          const lastPoint = dataPoints[dataPoints.length - 1];
-          const lastTime = new Date(lastPoint.date).getTime();
-          const newTime = new Date(measurement.date).getTime();
-          const diff = newTime - lastTime;
-
-          if (diff < resolutionMs) {
-            // Within the same bucket: update the last point's value and date
-            dataPoints[dataPoints.length - 1] = {
-              date: measurement.date,
-              value: measurement.value
-            };
-          } else {
-            // New bucket: append new point
-            dataPoints.push({
-              date: measurement.date,
-              value: measurement.value
-            });
-          }
-        }
-
-        // Keep only points within the sliding time window
-        const trimmedPoints = dataPoints.filter(dp => new Date(dp.date).getTime() >= cutoff);
-
-        return {
-          ...series,
-          data: trimmedPoints
-        };
-      });
-    });
-  }
 }
 
-/**
- * Generates a historical data series using a random walk.
- */
+/** Generates simulated telemetry historical series using a random walk. */
 function generateSeries(
   type: string,
-  startValue: number,
-  stepSize: number,
   dataPoints: number,
   intervalMs: number,
-  startDate: Date = new Date()): MeasurementSeries {
+  startDate: Date
+): MeasurementSeries {
+  const meta = MOCK_METADATA[type];
   const data: DataPoint[] = [];
-  let currentValue = startValue;
+  let currentValue = +(meta.min + (meta.max - meta.min) / 2).toFixed(2);
+  const startTime = startDate.getTime();
 
   for (let i = 0; i <= dataPoints; i++) {
-    const date = new Date(startDate.getTime() + i * intervalMs).toISOString();
-    currentValue = generateNextValue(type, currentValue, stepSize);
-    data.push({ date, value: currentValue });
+    const date = new Date(startTime + i * intervalMs).toISOString();
+    const step = (Math.random() - 0.5) * meta.stepSize;
+    currentValue = Math.max(meta.min, Math.min(meta.max, currentValue + step));
+    data.push({ date, value: +currentValue.toFixed(2) });
   }
+
   return { type, data };
-}
-
-/**
- * Calculates the next value in a random walk, with occasional edge cases and soft boundaries.
- */
-function generateNextValue(type: string, current: number, stepSize: number): number {
-  const { min, max } = MOCK_METADATA[type];
-
-  // 1% chance of an edge case spike
-  if (Math.random() < 0.01) {
-    return +(Math.random() > 0.5 ? max + stepSize : min - stepSize).toFixed(2);
-  }
-
-  // Simple random walk
-  let next = current + (Math.random() - 0.5) * stepSize;
-
-  // Keep it mostly in the safe zone
-  const safeMax = max - (max - min) * 0.2;
-  const safeMin = min + (max - min) * 0.2;
-
-  if (next > safeMax) next -= stepSize;
-  if (next < safeMin) next += stepSize;
-
-  return +next.toFixed(2);
 }

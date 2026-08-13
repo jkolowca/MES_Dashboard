@@ -27,7 +27,7 @@ export interface LiveMeasurement {
  * Metadata defining the properties and operating thresholds of a measurement type.
  */
 export interface MeasurementMetadata {
-  i18nKey: string;
+  name: string;
   unit: string;
   min: number;
   max: number;
@@ -37,29 +37,11 @@ export interface MeasurementMetadata {
 }
 
 /**
- * Dynamic translation helper mapping translation keys to localized strings using $localize.
- */
-export function translateMetadataKey(i18nKey: string): string {
-  switch (i18nKey) {
-    case 'MEASUREMENTS.INLET_TEMP':
-      return $localize`:@@MEASUREMENTS.INLET_TEMP:Inlet Temperature`;
-    case 'MEASUREMENTS.OUTLET_TEMP':
-      return $localize`:@@MEASUREMENTS.OUTLET_TEMP:Outlet Temperature`;
-    case 'MEASUREMENTS.PRESSURE':
-      return $localize`:@@MEASUREMENTS.PRESSURE:Coolant Pressure`;
-    case 'MEASUREMENTS.FLOW_RATE':
-      return $localize`:@@MEASUREMENTS.FLOW_RATE:Flow Rate`;
-    default:
-      return i18nKey;
-  }
-}
-
-/**
  * Mock database payload representing the sensor configurations.
  */
 export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
   inletTemperature: {
-    i18nKey: 'MEASUREMENTS.INLET_TEMP',
+    name: 'Inlet Temperature',
     unit: '°C',
     min: 38,
     max: 47,
@@ -68,7 +50,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 0.5
   },
   outletTemperature: {
-    i18nKey: 'MEASUREMENTS.OUTLET_TEMP',
+    name: 'Outlet Temperature',
     unit: '°C',
     min: 58,
     max: 67,
@@ -77,7 +59,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 0.5
   },
   coolantPressure: {
-    i18nKey: 'MEASUREMENTS.PRESSURE',
+    name: 'Coolant Pressure',
     unit: 'bar',
     min: 1.5,
     max: 2.8,
@@ -86,7 +68,7 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 0.05
   },
   flowRate: {
-    i18nKey: 'MEASUREMENTS.FLOW_RATE',
+    name: 'Flow Rate',
     unit: 'L/min',
     min: 90,
     max: 120,
@@ -95,4 +77,3 @@ export const MOCK_METADATA: Record<string, MeasurementMetadata> = {
     stepSize: 1
   }
 };
-

@@ -41,16 +41,23 @@ export function getChartDatasetOptions(
   };
 }
 
+export interface AxisScaleConfig {
+  label: string;
+  color: string;
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Dynamically builds the options configuration for Chart.js,
+ * constructing individual y-scales dynamically based on the active axis config.
+ */
 export function getChartOptions(
   activeAxes: string[],
   isMobile: boolean,
-  axisLimits?: Record<string, { min: number; max: number }>,
+  axesConfig: Record<string, AxisScaleConfig>,
   isDarkMode?: boolean
 ) {
-  const showTemp = activeAxes.includes('yTemperature');
-  const showPressure = activeAxes.includes('yPressure');
-  const showFlow = activeAxes.includes('yFlow');
-
   const getPosition = (axis: string) => activeAxes[0] === axis ? 'left' : 'right';
 
   const getGrid = (axis: string) => {
@@ -66,6 +73,53 @@ export function getChartOptions(
 
   const textColor = isDarkMode ? '#cbd5e1' : '#475569';
   const fontFamily = "'IBM Plex Sans', sans-serif";
+
+  // Build the dynamic scales object starting with the x-axis
+  const scales: Record<string, object> = {
+    x: {
+      ticks: {
+        color: textColor,
+        maxTicksLimit: isMobile ? 3 : 8,
+        font: { family: fontFamily, size: isMobile ? 10 : 12 },
+        padding: isMobile ? 5 : 10
+      },
+      grid: {
+        display: false,
+        drawBorder: false,
+        drawTicks: false
+      },
+      border: { display: false }
+    }
+  };
+
+  // Add y-axis configurations dynamically
+  for (const axis of activeAxes) {
+    const config = axesConfig[axis];
+    if (!config) continue;
+
+    scales[axis] = {
+      type: 'linear',
+      display: true,
+      position: getPosition(axis),
+      title: {
+        display: !isMobile,
+        text: config.label,
+        color: config.color,
+        font: { family: fontFamily, size: 13, weight: '700' },
+        padding: { bottom: 10, top: 10 }
+      },
+      ticks: {
+        color: config.color,
+        font: { family: fontFamily, size: isMobile ? 10 : 12, weight: '500' },
+        padding: isMobile ? 5 : 10,
+        includeBounds: true
+      },
+      grid: getGrid(axis),
+      border: { display: false },
+      min: config.min,
+      max: config.max
+    };
+  }
 
   return {
     maintainAspectRatio: true,
@@ -89,87 +143,6 @@ export function getChartOptions(
         usePointStyle: true
       }
     },
-    scales: {
-      x: {
-        ticks: {
-          color: textColor,
-          maxTicksLimit: isMobile ? 3 : 8,
-          font: { family: fontFamily, size: isMobile ? 10 : 12 },
-          padding: isMobile ? 5 : 10
-        },
-        grid: {
-          display: false,
-          drawBorder: false,
-          drawTicks: false
-        },
-        border: { display: false }
-      },
-      yTemperature: {
-        type: 'linear',
-        display: showTemp,
-        position: getPosition('yTemperature'),
-        title: {
-          display: !isMobile,
-          text: 'Temperature (°C)',
-          color: textColor,
-          font: { family: fontFamily, size: 13, weight: '700' },
-          padding: { bottom: 10, top: 10 }
-        },
-        ticks: {
-          color: textColor,
-          font: { family: fontFamily, size: isMobile ? 10 : 12, weight: '500' },
-          padding: isMobile ? 5 : 10,
-          includeBounds: true
-        },
-        grid: getGrid('yTemperature'),
-        border: { display: false },
-        min: axisLimits?.['yTemperature']?.min,
-        max: axisLimits?.['yTemperature']?.max
-      },
-      yPressure: {
-        type: 'linear',
-        display: showPressure,
-        position: getPosition('yPressure'),
-        title: {
-          display: !isMobile,
-          text: 'Pressure (bar)',
-          color: '#6d28d9',
-          font: { family: fontFamily, size: 13, weight: '700' },
-          padding: { bottom: 10, top: 10 }
-        },
-        ticks: {
-          color: '#6d28d9',
-          font: { family: fontFamily, size: 12, weight: '500' },
-          padding: isMobile ? 5 : 10,
-          includeBounds: true
-        },
-        grid: getGrid('yPressure'),
-        border: { display: false },
-        min: axisLimits?.['yPressure']?.min,
-        max: axisLimits?.['yPressure']?.max
-      },
-      yFlow: {
-        type: 'linear',
-        display: showFlow,
-        position: getPosition('yFlow'),
-        title: {
-          display: !isMobile,
-          text: 'Flow (L/min)',
-          color: '#047857',
-          font: { family: fontFamily, size: 13, weight: '700' },
-          padding: { bottom: 10, top: 10 }
-        },
-        ticks: {
-          color: '#047857',
-          font: { family: fontFamily, size: 12, weight: '500' },
-          padding: isMobile ? 5 : 10,
-          includeBounds: true
-        },
-        grid: getGrid('yFlow'),
-        border: { display: false },
-        min: axisLimits?.['yFlow']?.min,
-        max: axisLimits?.['yFlow']?.max
-      }
-    }
+    scales
   };
 }

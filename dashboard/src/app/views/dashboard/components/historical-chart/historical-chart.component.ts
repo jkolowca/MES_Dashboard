@@ -1,5 +1,5 @@
 import { Component, computed, inject, linkedSignal } from '@angular/core';
-import { getChartDatasetOptions, getChartOptions, TIME_SPAN_OPTIONS } from './historical-chart.config';
+import { getChartDatasetOptions, getChartOptions, TIME_SPAN_OPTIONS, AxisScaleConfig } from './historical-chart.config';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ChartModule } from 'primeng/chart';
@@ -8,7 +8,6 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { MeasurementService } from '../../../../core/services/measurement.service';
 import { CardModule } from 'primeng/card';
 import { UiStateService } from '../../../../core/services/ui-state.service';
-import { translateMetadataKey } from '../../../../core/models/measurement.model';
 
 @Component({
   selector: 'app-historical-chart',
@@ -25,7 +24,7 @@ export class HistoricalChartComponent {
     const meta = this.measurementService.metadata.value();
     if (!meta) return [];
     return Object.entries(meta).map(([key, value]) => ({
-      label: translateMetadataKey(value.i18nKey),
+      label: value.name,
       value: key,
       color: value.color
     }));
@@ -90,22 +89,34 @@ export class HistoricalChartComponent {
     return { labels, datasets };
   });
 
-  // Chart configuration
+  // Chart configuration with dynamic scales
   public chartOptions = computed(() => {
     const meta = this.measurementService.metadata.value();
     const selected = this.selectedMetrics();
     const activeAxes: string[] = [];
+    const axesConfig: Record<string, AxisScaleConfig> = {};
 
     if (meta) {
       for (const key of selected) {
-        const axis = meta[key]?.axis;
-        if (axis && !activeAxes.includes(axis)) {
-          activeAxes.push(axis);
+        const metricMeta = meta[key];
+        if (metricMeta) {
+          const axis = metricMeta.axis;
+          if (axis) {
+            if (!activeAxes.includes(axis)) {
+              activeAxes.push(axis);
+            }
+            
+            if (!axesConfig[axis]) {
+              axesConfig[axis] = {
+                label: `${metricMeta.name} (${metricMeta.unit})`,
+                color: metricMeta.color
+              };
+            }
+          }
         }
       }
     }
 
-    const axisLimits: Record<string, { min: number; max: number }> = {};
     if (meta) {
       for (const axis of activeAxes) {
         const metricsForAxis = selected.filter(key => meta[key]?.axis === axis);
@@ -115,14 +126,12 @@ export class HistoricalChartComponent {
           const minVal = Math.min(...mins);
           const maxVal = Math.max(...maxs);
           const range = maxVal - minVal;
-          axisLimits[axis] = {
-            min: +(minVal - 0.1 * range).toFixed(2),
-            max: +(maxVal + 0.1 * range).toFixed(2)
-          };
+          axesConfig[axis].min = +(minVal - 0.1 * range).toFixed(2);
+          axesConfig[axis].max = +(maxVal + 0.1 * range).toFixed(2);
         }
       }
     }
 
-    return getChartOptions(activeAxes, this.isMobile(), axisLimits, this.uiStateService.isDarkMode());
+    return getChartOptions(activeAxes, this.isMobile(), axesConfig, this.uiStateService.isDarkMode());
   });
 }
