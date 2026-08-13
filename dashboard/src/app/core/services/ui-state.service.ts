@@ -1,11 +1,9 @@
-import { Injectable, signal, inject, DestroyRef } from '@angular/core';
+import { Service, signal, effect, inject, DestroyRef } from '@angular/core';
 
 /**
  * Service responsible for managing global UI state across the application.
  */
-@Injectable({
-  providedIn: 'root'
-})
+@Service()
 export class UiStateService {
   /** Signal tracking dark mode state. */
   public readonly isDarkMode = signal(false);
@@ -21,19 +19,33 @@ export class UiStateService {
       const mqlListener = (e: MediaQueryListEvent) => {
         this.isMobile.set(e.matches);
       };
-
       mql.addEventListener('change', mqlListener);
-
       this.destroyRef.onDestroy(() => {
         mql.removeEventListener('change', mqlListener);
+      });
+
+      // Synchronously restore state on initialization to prevent layout flash
+      const savedTheme = localStorage.getItem('theme');
+      const isDark = savedTheme === 'dark';
+      this.isDarkMode.set(isDark);
+      this.updateThemeClass(isDark);
+
+      // Keep localStorage and DOM state in sync with signals
+      effect(() => {
+        const dark = this.isDarkMode();
+        this.updateThemeClass(dark);
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
       });
     }
   }
 
   /** Toggles the application theme. */
-  public toggleTheme() {
+  public toggleTheme(): void {
     this.isDarkMode.update(v => !v);
-    if (this.isDarkMode()) {
+  }
+
+  private updateThemeClass(isDark: boolean): void {
+    if (isDark) {
       document.documentElement.classList.add('app-dark');
     } else {
       document.documentElement.classList.remove('app-dark');

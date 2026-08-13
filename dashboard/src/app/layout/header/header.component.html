@@ -1,5 +1,10 @@
 <header>
   <div class="left">
+    @if(uiStateService.isMobile()) {
+    <button pButton pSidebarTrigger target="main-menu" aria-label="Toggle menu" i18n-aria-label iconOnly variant="text">
+      <svg pIcon="bars"></svg>
+    </button>
+    }
     <img src="icons/logo.svg" alt="A-MES logo" class="logo" />
     <h1 i18n>A-MES</h1>
   </div>
